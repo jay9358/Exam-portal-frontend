@@ -1,0 +1,45 @@
+/* Sidebar.css */
+
+/* Sidebar container */
+.sidebar {
+    background-color: #4c51bf; /* Blue background */
+    width: 256px; /* Sidebar width */
+    height: 100vh; /* Full height */
+    position: fixed; /* Fixed position to stay in place */
+    top: 0;
+    left: 0;
+    border-top-right-radius: 20px; /* Rounded top-right corner */
+    border-bottom-right-radius: 20px; /* Rounded bottom-right corner */
+    padding: 20px;
+  }
+  
+  /* Style for list items to ensure icons and text are inline */
+  .sidebar ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  
+  .sidebar li {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+  }
+  
+  .sidebar li span {
+    font-size: 16px;
+    margin-left: 10px; /* Space between icon and text */
+  }
+  
+  /* Small icons */
+  .sidebar .h-5 {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Hover effect on menu items */
+  .sidebar li:hover {
+    background-color: #3b429d; /* Darken on hover */
+    cursor: pointer;
+    border-radius: 8px;
+  }
+  

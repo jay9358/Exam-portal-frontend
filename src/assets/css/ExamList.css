@@ -1,0 +1,89 @@
+/* Container and Header */
+.exam-list-container {
+    padding: 20px;
+  }
+  
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .heading {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  /* Import Button */
+  .import-button {
+    padding: 8px 16px;
+    background-color: transparent;
+    color: #007bff;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .import-button:hover {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  /* Table Styling */
+  .exam-table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .exam-table th,
+  .exam-table td {
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+  
+  .exam-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  /* Actions and Icons */
+  .action-icons {
+    display: flex;
+    align-items: center;
+  }
+  
+  .icon {
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  
+  .edit-icon {
+    color: #007bff;
+  }
+  
+  .delete-icon {
+    color: #dc3545;
+  }
+  
+  /* PDF Button Styling */
+  .pdf-button {
+    padding: 5px 15px;
+    background-color: transparent;
+    color: #007bff;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .pdf-button:hover {
+    background-color: #007bff;
+    color: white;
+  }
+  

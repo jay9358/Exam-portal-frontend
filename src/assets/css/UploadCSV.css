@@ -1,0 +1,212 @@
+/* Main container */
+.upload-csv {
+  padding: 20px;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Heading */
+.upload-csv h1 {
+  font-size: 2rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+/* Custom Upload Button */
+.custom-upload-btn {
+  background-color: #fff;
+  color: #007bff;
+  font-size: 16px;
+  padding: 12px 24px;
+  border: 1px solid #007bff;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.custom-upload-btn:hover {
+  background-color: #a6c6e8;
+}
+
+/* Hidden file input */
+.upload-input {
+  display: none; /* Hide the default file input */
+}
+
+/* File info display */
+.file-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 200px;
+  margin-top: 10px;
+}
+
+/* Delete button (Trash icon) */
+.delete-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  color: #007bff;
+}
+
+.icon:hover {
+  color: #007bff;
+}
+
+/* Save button container */
+.save-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* Save button styling */
+.save-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 23px;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 10px 20px;
+  width: auto;
+}
+
+.save-button:hover {
+  background-color: #0056b3;
+}
+.user-table {
+  display: flex;
+  justify-content: center;
+  flex-direction: inherit;
+  margin-top: 20px;
+  border-collapse: collapse; /* Ensures borders are collapsed */
+  width: 100%;
+}
+
+.user-table th, .user-table td {
+  border: 1px solid #ddd; /* Adds a border around each cell */
+  padding: 8px; /* Adds padding inside cells */
+  text-align: left; /* Aligns text to the left */
+}
+
+.user-table th {
+  background-color: #f2f2f2; /* Light gray background for header */
+  font-weight: bold; /* Makes header text bold */
+}
+
+.user-table tr:hover {
+  background-color: #f1f1f1; /* Changes background on hover */
+}
+
+.pagination {
+  margin-top: 20px; /* Adds space above pagination */
+}
+
+.pagination button {
+  margin: 0 5px; /* Adds space between pagination buttons */
+  padding: 5px 10px; /* Adds padding inside buttons */
+  border: none; /* Removes default border */
+  background-color: #007bff; /* Blue background for buttons */
+  color: white; /* White text color */
+  cursor: pointer; /* Changes cursor to pointer on hover */
+}
+
+.pagination button.active {
+  background-color: #0056b3; /* Darker blue for active button */
+}
+
+.delete-all-section {
+  margin: 1rem 0;
+}
+
+.delete-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #dc2626;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.delete-all-btn:hover {
+  background-color: #b91c1c;
+}
+
+.delete-all-btn .icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.confirmation-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.dialog-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  max-width: 400px;
+  width: 90%;
+}
+
+.dialog-content h3 {
+  margin-top: 0;
+  color: #dc2626;
+}
+
+.dialog-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  justify-content: flex-end;
+}
+
+.cancel-btn {
+  padding: 0.5rem 1rem;
+  background-color: #e5e7eb;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+.confirm-btn {
+  padding: 0.5rem 1rem;
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background-color: #d1d5db;
+}
+
+.confirm-btn:hover {
+  background-color: #b91c1c;
+}

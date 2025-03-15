@@ -1,0 +1,79 @@
+/* Ensure the body takes up the full height of the screen */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Centering container */
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f3f4f6; /* Light gray background */
+  }
+  
+  /* Centered Box */
+  .box {
+    background-color: white;
+    padding: 40px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+  }
+  
+  /* Logo Style */
+  .logo {
+    width: 120px;
+    margin-bottom: 20px;
+  }
+  
+  /* Greeting Text */
+  .greeting-text {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  
+  /* Buttons Container */
+  .button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+  }
+  
+  /* Button Base Style */
+  .button {
+    display: block;
+    padding: 15px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+  }
+  
+  /* Admin Button Style */
+  .admin-button {
+    background-color: #3b82f6; /* Blue color */
+    color: white;
+  }
+  
+  .admin-button:hover {
+    background-color: #3b82f6; /* Darker blue on hover */
+  }
+  
+  /* Student Button Style */
+  .student-button {
+    background-color: #3b82f6; /* Green color */
+    color: white;
+  }
+  
+  

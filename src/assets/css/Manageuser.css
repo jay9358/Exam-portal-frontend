@@ -1,0 +1,407 @@
+.manage-users {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.manage-users-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.manage-users-header h1 {
+  font-size: 2.5rem;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  background: linear-gradient(120deg, #2563eb, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.manage-users-header h4 {
+  font-size: 1.8rem;
+  color: #475569;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.form-section {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .form-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .users-table-container {
+    overflow-x: auto;
+  }
+  
+  .users-table {
+    min-width: 600px;
+  }
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+/* Consistent Input Styling */
+.input-field,
+.select-field {
+  width: 100%;
+  height: 48px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background-color: white !important;
+  transition: all 0.3s ease;
+  color: #1e293b;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.input-field:focus,
+.select-field:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.input-field::placeholder {
+  color: #94a3b8;
+}
+
+.select-field {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+  padding-right: 2.5rem;
+}
+
+/* No Data State */
+.no-data-container {
+  margin-top: 3rem;
+  padding: 3rem 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.no-data-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: #64748b;
+}
+
+.no-data-icon {
+  width: 64px;
+  height: 64px;
+  color: #94a3b8;
+  margin-bottom: 1rem;
+}
+
+.no-data-content h3 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  font-weight: 600;
+  margin: 0;
+}
+
+.no-data-content p {
+  font-size: 1rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Update Users Table Container */
+.users-table-container {
+  margin-top: 3rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.users-table-container h4 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin: 1.5rem;
+  font-weight: 600;
+}
+
+/* Update Table Styles */
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.users-table th {
+  background: #f8fafc;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.users-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+.users-table tr:hover {
+  background-color: #f8fafc;
+}
+
+.table-role {
+  font-weight: 600;
+  color: #3b82f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(59, 130, 246, 0.1);
+  display: inline-block;
+  font-size: 0.875rem;
+}
+
+/* Update Pagination Styles */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.pagination-button {
+  padding: 0.5rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  color: #1e293b;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #3b82f6;
+  color: #3b82f6;
+  transform: translateY(-1px);
+}
+
+.pagination-button.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.pagination-button:disabled {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.add-button {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.add-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px -1px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.add-button:active {
+  transform: translateY(0);
+}
+
+.users-list {
+  margin-top: 3rem;
+}
+
+.users-list h4 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.user-item {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-color: #3b82f6;
+}
+
+.user-info {
+  color: #1e293b;
+  font-size: 1rem;
+}
+
+.user-role {
+  color: #3b82f6;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.user-email {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+}
+
+.user-school {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+}
+
+.user-leading {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+}
+
+/* School Dropdown Styling */
+.school-dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 50;
+  padding: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 #f1f5f9;
+}
+
+.school-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.school-dropdown::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.school-dropdown::-webkit-scrollbar-thumb {
+  background-color: #94a3b8;
+  border-radius: 10px;
+  border: 2px solid #f1f5f9;
+}
+
+.school-dropdown li {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+.school-dropdown li:before {
+  content: "🏫";
+  font-size: 1.1rem;
+}
+
+.school-dropdown li:hover {
+  background: #f8fafc;
+  color: #3b82f6;
+  transform: translateX(5px);
+}
+
+.school-dropdown li:active {
+  background: #f1f5f9;
+  transform: translateX(5px) scale(0.99);
+}
+
+/* Input group with dropdown open */
+.input-group.with-dropdown .input-field {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* School ID input specific styling */
+.input-field[name="school"] {
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3ccircle cx='11' cy='11' r='8'%3e%3c/circle%3e%3cline x1='21' y1='21' x2='16.65' y2='16.65'%3e%3c/line%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.25rem;
+}
+
+/* Add animation for dropdown */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.school-dropdown {
+  animation: slideDown 0.2s ease-out;
+}
+  

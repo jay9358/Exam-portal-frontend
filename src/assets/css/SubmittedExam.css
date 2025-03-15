@@ -1,0 +1,34 @@
+.submitted-exam {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.result-details {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.result-details p {
+  margin: 5px 0;
+}
+
+.chart-container {
+  margin-top: 20px;
+}
+
+.chart-container h3 {
+  margin-bottom: 15px;
+}
+
+.pie-chart {
+  width: 300px; /* Fixed dimensions for a circular chart */
+  height: 300px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
