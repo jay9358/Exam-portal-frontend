@@ -3,34 +3,57 @@ import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./Components/Navbar";
 import AdminSidebar from "./Components/AdminSidebar";
 import StudentSidebar from './Components/StudentSidebar';
+import StateManagerSideBar from './Components/stateManager/StateManagerSideBar';
+import CityManagerSidebar from './Components/cityManager/CityManagerSidebar';
+import './assets/css/Layout.css';
 
 export default function Layout() {
   const location = useLocation();
-
-  // Safely access state and destructure flag with a fallback value (e.g., null)
   const flag = localStorage.getItem("flag");
 
   // Define paths where the sidebar should be hidden
-  const hideSidebarPaths = ["/", "/stulogin", "/adminlogin", "/reset"];
+  const hideSidebarPaths = [
+    "/", 
+    "/stulogin", 
+    "/adminlogin", 
+    "/reset",
+    "/statemanagerlogin",
+    "/citymanagerlogin"  // Added city manager login path
+  ];
 
   // Check if the current path matches any of the paths where the sidebar should be hidden
   const isSidebarHidden = hideSidebarPaths.includes(location.pathname);
 
+  const renderSidebar = () => {
+    switch(flag) {
+      case "Admin":
+        return <AdminSidebar />;
+      case "Student":
+        return <StudentSidebar />;
+      case "StateManager":
+        return <StateManagerSideBar />;
+      case "CityManager":
+        return <CityManagerSidebar />;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div style={layoutStyles.container}>
+    <div className="layout-container">
       {!isSidebarHidden && (
-        <div style={layoutStyles.sidebar}>
-          {flag === "Admin" ? <AdminSidebar /> : <StudentSidebar />} 
+        <div className="layout-sidebar">
+          {renderSidebar()}
         </div>
       )}
       <div
+        className="layout-main-content"
         style={{
-          ...layoutStyles.mainContent,
           marginLeft: isSidebarHidden ? 0 : "250px",
         }}
       >
         <Navbar />
-        <div style={layoutStyles.content}>
+        <div className="layout-content">
           <Outlet />
         </div>
       </div>

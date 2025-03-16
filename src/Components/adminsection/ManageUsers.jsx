@@ -14,6 +14,7 @@ const ManageUsers = () => {
     school: "",
     leading: [],
     State: "",  
+    City:"",
   });
   const [users, setUsers] = useState([]);
   const [schools, setSchools] = useState([]);
@@ -93,7 +94,7 @@ const ManageUsers = () => {
 
   // Handle adding a new user
   const handleAddUser = async () => {
-    const { firstName, lastName, accountType, school, email, mobileNumber, leading, State } = formData;
+    const { firstName, lastName, accountType, school, email, mobileNumber, leading,City, State } = formData;
 
     // Check if all required fields are filled
     if (!firstName || !lastName || !accountType ) {
@@ -106,6 +107,12 @@ const ManageUsers = () => {
             return;
         }
     }
+    if(accountType === "CityManager"){
+        if(!City){
+            console.log("City is required");
+            return;
+        }
+    } 
 
     // Create the payload with the school ID and student information
     const payload = {
@@ -118,6 +125,7 @@ const ManageUsers = () => {
                 mobileNumber,
                 accountType,
                 State,
+                City,
                  // Include account type
                 // Add any other fields required by your User model
             },
@@ -148,6 +156,7 @@ const ManageUsers = () => {
                 accountType: "",
                 image: "",
                 State: "",
+                City:"",
                 school: "",
                 leading: [],
             });
@@ -321,6 +330,18 @@ const ManageUsers = () => {
             />
           </div>
         )}
+        {(formData.accountType === "CityManager") && (
+          <div className="input-group">
+            <input
+              type="text"
+              name="City"
+              value={formData.City}
+              onChange={handleInputChange}
+              placeholder="City"
+              className="input-field"
+            />
+          </div>
+        )}
 
         <div className="input-group">
           <input
@@ -348,7 +369,8 @@ const ManageUsers = () => {
                 <th>Role</th>
                 <th>Email</th>
                 <th>{formData.accountType === "StateManager" || formData.accountType === "CityManager" ? "State" : "School"}</th>
-                <th>Leading</th>
+                { formData.accountType === "CityManager" && <th>City</th>}
+                
               </tr>
             </thead>
             <tbody>
@@ -356,11 +378,11 @@ const ManageUsers = () => {
                 <tr key={index}>
                   <td>{user.firstName} {user.lastName}</td>
                   <td>
-                    <span className="table-role">{user.role}</span>
+                    <span className="table-role">{user.accountType}</span>
                   </td>
                   <td>{user.email || '-'}</td>
-                  <td>{formData.accountType === "StateManager" ? user.State : user.school || '-'}</td>
-                  <td>{user.leading?.length > 0 ? user.leading.join(", ") : '-'}</td>
+                  <td>{formData.accountType === "StateManager" || formData.accountType === "CityManager" ? user.State : user.school || '-'}</td>
+                  {formData.accountType === "CityManager" && <td>{user.City}</td>}
                 </tr>
               ))}
             </tbody>

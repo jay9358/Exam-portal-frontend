@@ -22,6 +22,10 @@ import SubmittedExam from '../Components/SubmittedExam';
 import ExamInstructions from '../Components/ExamInstructions';
 import RegisterSchools  from '../Components/adminsection/UploadCSVschool';
 import PerformanceReports from '../Components/adminsection/PerformanceReports';
+import StateManagerReports from '../Components/stateManager/StateManagerReport';
+import StateManagerLogin from '../Components/stateManager/StateManagerLogin';
+import CityManagerLogin from '../Components/cityManager/CityManagerLogin';
+import CityManagerReport from '../Components/cityManager/CityManagerReport';
 const Routes = createBrowserRouter(
 	createRoutesFromElements(
 		<Route element={<Layout />}>
@@ -45,13 +49,15 @@ const Routes = createBrowserRouter(
 			<Route path="/performancereports" element={<PerformanceReports />} />
 			<Route path="/manageexam" element={<ManageExams />} />
 			<Route path="/manageuser" element={<ManageUsers />} />
-
+			<Route path="/statemanagerreports" element={<StateManagerReports />} />
 			<Route path="/uploadcsv" element={<UploadCSV />} />
 			<Route path="/uploadcsvSchools" element={<RegisterSchools />} />
 			<Route path="/examlist" element={<ExamList />} />
 			<Route path="/managequestionsets" element={<ManageQuestionSets />} />
 			<Route path="/exampage" element={<ExamPages />} />
-
+			<Route path="/statemanagerlogin" element={<StateManagerLogin />} />
+			<Route path="/citymanagerlogin" element={<CityManagerLogin />} />
+			<Route path="/citymanagerreports" element={<CityManagerReport />} />
 			{/* Protected Routes for Student */}
 			<Route path="/studhome" element={<StudentSection />} />
 		</Route>
