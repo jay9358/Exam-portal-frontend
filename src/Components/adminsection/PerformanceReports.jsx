@@ -15,7 +15,9 @@ const PerformanceReports = () => {
   const [user, setUser] = useState(null);
   const [result, setResult] = useState(null);
   const [studentSearch, setStudentSearch] = useState("");
-  const [filteredStudent, setFilteredStudent] = useState(null);
+  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [exams, setExams] = useState([]);
+  const [selectedExam, setSelectedExam] = useState("");
   // List of Indian states
   const indianStates = [
     "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
@@ -73,21 +75,34 @@ const PerformanceReports = () => {
       console.error("Error fetching schools:", error);
       toast.error("Error fetching schools.");
     }
+    console.log(exams)
   };
 
   useEffect(() => {
     
     fetchAllSchools();
   }, []);
+
   useEffect(() => {
-    if (selectedState && selectedCity) {
-      const filtered = schools.filter(
-        (school) => school.state === selectedState && school.city === selectedCity
-      );
+    if (selectedState && selectedCity && schools.length > 0) {
+      console.log('Filtering schools with:', { selectedState, selectedCity });
+      console.log('Available schools:', schools);
+      
+      const filtered = schools.filter((school) => {
+        const stateMatch = school.state?.toLowerCase() === selectedState.toLowerCase();
+        console.log('State match:', stateMatch);
+        console.log('School state:', school.state);
+        const cityMatch = school.city?.toLowerCase() === selectedCity.toLowerCase();
+        console.log('City match:', cityMatch);
+        return stateMatch && cityMatch;
+      });
+      
+      console.log('Filtered schools:', filtered);
       setFilteredSchools(filtered);
     } else {
       setFilteredSchools([]);
     }
+    
   }, [selectedState, selectedCity, schools]);
   const handleStateChange = (e) => {
     setSelectedState(e.target.value);
@@ -103,12 +118,17 @@ const PerformanceReports = () => {
   const handleSchoolChange = (e) => {
     setSelectedSchool(e.target.value);
   };
+
+  const handleExamChange = (e) => {
+    setSelectedExam(e.target.value);
+  };
+
   const calculateStatistics = (results) => {
     console.log(results);
     if (!results || results.length === 0) return null;
     console.log("ds");
     const totalStudents = results.length;
-    const passedStudents = results.filter(result => result.status === "PASS").length;
+    const passedStudents = results.filter(result => result.status === "Pass").length;
     const totalScore = results.reduce((sum, result) => sum + result.score, 0);
     const averageScore = (totalScore / totalStudents).toFixed(2);
     
@@ -120,29 +140,64 @@ const PerformanceReports = () => {
       passPercentage: ((passedStudents / totalStudents) * 100).toFixed(2)
     };
   };
-  const handleStudentSearch = (e) => {
-    e.preventDefault();
-    if (!reportData || !reportData.results) return;
+  const token = localStorage.getItem("token");
+  const handleFetchExams = async () => {
+		try {
+			const response = await axios.get(
+				`${import.meta.env.VITE_API_URL}/v1/admin/exams`,
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+			setExams(response.data.exams);
+			setLoading(false);
+		} catch (error) {
+			console.error("Error fetching exams:", error.response?.data || error.message);
+			setLoading(false);
+		}
+	};
 
+	useEffect(() => {
+		handleFetchExams();
+    
+	}, []);
+  const handleStudentSearch = (searchValue) => {
+    if (!reportData || !reportData.users) return;
 
-    setFilteredStudent(student || null);
+    const searchTerm = searchValue.toLowerCase().trim();
+    console.log("searchTerm", searchTerm);
+    console.log("reportData", reportData.users);
+    const matchingStudents = reportData.users.filter(
+      (student) =>
+        student.rollNo?.toLowerCase().includes(searchTerm) ||
+        student.firstName?.toLowerCase().includes(searchTerm) ||
+        student.lastName?.toLowerCase().includes(searchTerm) ||
+        `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm)
+    );
+    console.log("matchingStudents", matchingStudents);
+
+    setFilteredStudents(matchingStudents);
   };
 
   const handleGenerateReport = async (e) => {
     e.preventDefault();
-    if (!selectedState || !selectedCity || !selectedSchool) {
+    if (!selectedState || !selectedCity || !selectedSchool || !selectedExam) {
       toast.error("Please select all fields");
       return;
     }
     setLoading(true);
     try {
+      console.log(selectedExam)
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/v1/admin/reports/performance`,
         {
           params: {
             state: selectedState,
             city: selectedCity,
-            schoolId: selectedSchool
+            schoolId: selectedSchool,
+            examId: selectedExam
           },
           headers: {
             Authorization: localStorage.getItem("token"),
@@ -150,10 +205,11 @@ const PerformanceReports = () => {
         }
       );
       setReportData(response.data.data);
-      setUser(response.data.data.user);
-      setResult(response.data.data.result);
+      setUser(response.data.data.users);
+      setResult(response.data.data.results);
 
       setShowReport(true);
+     
       
     } catch (error) {
       console.error("Error generating report:", error);
@@ -213,15 +269,45 @@ const PerformanceReports = () => {
             id="school"
             value={selectedSchool}
             onChange={handleSchoolChange}
-            disabled={!selectedCity}
+            disabled={!selectedCity || filteredSchools.length === 0}
             required
           >
             <option value="">Select School</option>
-            {filteredSchools.map((school) => (
-              <option key={school._id} value={school.schoolId}>
-                {school.schoolId} - {school.name}
+            {filteredSchools.length > 0 ? (
+              filteredSchools.map((school) => (
+                <option key={school._id} value={school.schoolId}>
+                  {school.schoolId} - {school.name || 'Unknown School Name'}
+                </option>
+              ))
+            ) : (
+              <option value="" disabled>
+                {selectedCity ? 'No schools found in this city' : 'Select a city first'}
               </option>
-            ))}
+            )}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="exam">Exam</label>
+          <select
+            id="exam"
+            value={selectedExam}
+            onChange={handleExamChange}
+            disabled={!selectedSchool}
+            required
+          >
+            <option value="">Select Exam</option>
+            {exams.length > 0 ? (
+              exams.map((exam) => (
+                <option key={exam._id} value={exam._id}>
+                  {exam.title || 'Untitled Exam'} - {new Date(exam.date).toLocaleDateString()}
+                </option>
+              ))
+            ) : (
+              <option value="" disabled>
+                No exams available
+              </option>
+            )}
           </select>
         </div>
 
@@ -236,7 +322,7 @@ const PerformanceReports = () => {
             <div className="loading">
               <p>Generating report...</p>
             </div>
-          ) : reportData && reportData.result ? (
+          ) : reportData && reportData.results ? (
             <div className="report-data">
               <h3>Performance Report</h3>
               
@@ -255,7 +341,7 @@ const PerformanceReports = () => {
                   </thead>
                   <tbody>
                     {(() => {
-                      const stats = calculateStatistics(reportData.result);
+                      const stats = calculateStatistics(reportData.results);
                       return stats && (
                         <tr>
                           <td>{stats.totalStudents}</td>
@@ -273,41 +359,49 @@ const PerformanceReports = () => {
               {/* Student Search Section */}
               <div className="student-search">
                 <h4>Search Student</h4>
-                <form onSubmit={handleStudentSearch} className="search-form">
+                <div className="search-form">
                   <input
                     type="text"
                     value={studentSearch}
-                    onChange={(e) => setStudentSearch(e.target.value)}
+                    onChange={(e) => {
+                      setStudentSearch(e.target.value);
+                      handleStudentSearch(e.target.value);
+                    }}
                     placeholder="Enter Student ID or Name"
-                    required
                   />
-                  <button type="submit">Search</button>
-                </form>
+                </div>
 
-                {filteredStudent && (
-                  <table className="student-result">
-                    <thead>
-                      <tr>
-                        <th>Student ID</th>
-                        <th>Name</th>
-                        <th>Score</th>
-                        <th>Status</th>
-                        <th>Exam Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>{filteredStudent.studentId}</td>
-                        <td>{filteredStudent.studentName}</td>
-                        <td>{filteredStudent.score}%</td>
-                        <td className={filteredStudent.status === "PASS" ? "pass" : "fail"}>
-                          {filteredStudent.status}
-                        </td>
-                        <td>{new Date(filteredStudent.examDate).toLocaleDateString()}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                )}
+                {filteredStudents.length > 0 ? (
+                  <div className="search-results">
+                    <p>Found {filteredStudents.length} matching students</p>
+                    <table className="student-result">
+                      <thead>
+                        <tr>
+                          <th>Roll No</th>
+                          <th>Name</th>
+                          <th>Level</th>
+                          <th>Generated Certificate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredStudents.map((student, index) => (
+                          <tr key={student._id || index}>
+                            <td>{student.rollNo}</td>
+                            <td>{`${student.firstName} ${student.lastName}`}</td>
+                            <td>{student.level}</td>
+                            <td>
+                              <button className="generate-certificate-btn">
+                                Generate Certificate
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : studentSearch ? (
+                  <p>No students found matching "{studentSearch}"</p>
+                ) : null}
               </div>
             </div>
           ) : (

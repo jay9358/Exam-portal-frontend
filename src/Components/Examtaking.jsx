@@ -14,6 +14,7 @@ const Examtaking = () => {
 	const [answers, setAnswers] = useState({});
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [timer, setTimer] = useState(null);
+	const [timerInterval, setTimerInterval] = useState(null);
 	const navigate = useNavigate();
 
 	const fetchQuestions = async () => {
@@ -77,6 +78,7 @@ const Examtaking = () => {
 			startTimer(remainingMinutes, remainingSeconds);
 		} catch (error) {
 			navigate(`/submitexam/${examId}/result`);
+			
 			console.log("Not able to start the exam", error);
 		}
 	};
@@ -87,6 +89,11 @@ const Examtaking = () => {
 	}, []);
 
 	const startTimer = (remainingMinutes, remainingSeconds) => {
+		// Clear any existing timer
+		if (timerInterval) {
+			clearInterval(timerInterval);
+		}
+
 		const endTime = Date.now() + (remainingMinutes * 60 * 1000) + (remainingSeconds * 1000);
 		const interval = setInterval(() => {
 			const remainingTime = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
@@ -98,7 +105,15 @@ const Examtaking = () => {
 				handleSubmitExam();
 			}
 		}, 1000);
-	}; 
+		setTimerInterval(interval);
+	};
+
+	const clearTimer = () => {
+		if (timerInterval) {
+			clearInterval(timerInterval);
+			setTimerInterval(null);
+		}
+	};
 
 	const handleOptionClick = (optionId, questionId) => {
 		// Update answers
@@ -159,6 +174,7 @@ const Examtaking = () => {
 	};
 
 	const handleSubmitExam = async () => {
+		clearTimer(); // Clear the timer when submitting
 		try {
 			// Create submission data with only answered questions
 			const answeredQuestions = questions.filter((q) => answers[q._id]);
@@ -187,6 +203,13 @@ const Examtaking = () => {
 			toast.error("Failed to submit the exam.");
 		}
 	};
+
+	// Clean up timer on component unmount
+	useEffect(() => {
+		return () => {
+			clearTimer();
+		};
+	}, []);
 
 	const attemptedCount = attemptedQuestions.filter(Boolean).length;
 	

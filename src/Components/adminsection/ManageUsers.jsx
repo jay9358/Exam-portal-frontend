@@ -13,6 +13,7 @@ const ManageUsers = () => {
     image: "",
     school: "",
     leading: [],
+    State: "",  
   });
   const [users, setUsers] = useState([]);
   const [schools, setSchools] = useState([]);
@@ -92,12 +93,18 @@ const ManageUsers = () => {
 
   // Handle adding a new user
   const handleAddUser = async () => {
-    const { firstName, lastName, accountType, school, email, mobileNumber, leading } = formData;
+    const { firstName, lastName, accountType, school, email, mobileNumber, leading, State } = formData;
 
     // Check if all required fields are filled
-    if (!firstName || !lastName || !accountType || !school) {
-        toast.warn("Please fill all the required fields");
+    if (!firstName || !lastName || !accountType ) {
+        console.log("Please fill all the required fields");
         return;
+    }
+    if(accountType === "StateManager" || accountType === "CityManager"){
+        if(!State){
+            console.log("State is required");
+            return;
+        }
     }
 
     // Create the payload with the school ID and student information
@@ -110,6 +117,7 @@ const ManageUsers = () => {
                 email,
                 mobileNumber,
                 accountType,
+                State,
                  // Include account type
                 // Add any other fields required by your User model
             },
@@ -117,9 +125,7 @@ const ManageUsers = () => {
     };
 
     // Handle additional fields based on account type
-    if (accountType === "StateManager" || accountType === "CityManager") {
-        payload.students[0].leading = leading.split(",").map(id => id.trim()); // Convert leading to an array
-    }
+
 
     try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/v1/auth/registerStudents`, {
@@ -141,6 +147,7 @@ const ManageUsers = () => {
                 mobileNumber: "",
                 accountType: "",
                 image: "",
+                State: "",
                 school: "",
                 leading: [],
             });
@@ -306,10 +313,10 @@ const ManageUsers = () => {
           <div className="input-group">
             <input
               type="text"
-              name="leading"
-              value={formData.leading}
+              name="State"
+              value={formData.State}
               onChange={handleInputChange}
-              placeholder="Leading (Comma-separated IDs)"
+              placeholder="State"
               className="input-field"
             />
           </div>
@@ -340,7 +347,7 @@ const ManageUsers = () => {
                 <th>Name</th>
                 <th>Role</th>
                 <th>Email</th>
-                <th>School</th>
+                <th>{formData.accountType === "StateManager" || formData.accountType === "CityManager" ? "State" : "School"}</th>
                 <th>Leading</th>
               </tr>
             </thead>
@@ -352,7 +359,7 @@ const ManageUsers = () => {
                     <span className="table-role">{user.role}</span>
                   </td>
                   <td>{user.email || '-'}</td>
-                  <td>{user.school || '-'}</td>
+                  <td>{formData.accountType === "StateManager" ? user.State : user.school || '-'}</td>
                   <td>{user.leading?.length > 0 ? user.leading.join(", ") : '-'}</td>
                 </tr>
               ))}

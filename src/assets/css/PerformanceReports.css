@@ -1,126 +1,210 @@
 .performance-reports {
-  max-width: 800px;
-  margin: 2rem auto;
   padding: 2rem;
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .report-header {
-  text-align: center;
   margin-bottom: 2rem;
+  text-align: center;
 }
 
 .report-header h2 {
+  color: #2c3e50;
   font-size: 2rem;
-  color: #1e293b;
   margin-bottom: 0.5rem;
 }
 
 .report-header p {
-  color: #64748b;
+  color: #7f8c8d;
   font-size: 1.1rem;
 }
 
 .report-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-group label {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #475569;
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #34495e;
+  font-weight: 500;
 }
 
 .form-group select {
+  width: 100%;
   padding: 0.75rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
   font-size: 1rem;
-  color: #1e293b;
-  background-color: white;
-  transition: all 0.3s ease;
+  color: #2c3e50;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-group select:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .form-group select:disabled {
-  background-color: #f1f5f9;
+  background-color: #f5f6fa;
   cursor: not-allowed;
 }
 
 .generate-btn {
-  margin-top: 1rem;
-  padding: 1rem 2rem;
-  background: #3b82f6;
+  width: 100%;
+  padding: 1rem;
+  background-color: #3498db;
   color: white;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 4px;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.2s;
 }
 
 .generate-btn:hover {
-  background: #2563eb;
-  transform: translateY(-1px);
-}
-
-.generate-btn:active {
-  transform: translateY(0);
+  background-color: #2980b9;
 }
 
 .report-result {
-  margin-top: 2rem;
+  background: #fff;
   padding: 2rem;
-  background: #f8fafc;
-  border-radius: 0.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.statistics-table {
+  margin-bottom: 2rem;
+}
+
+.statistics-table h4, .student-search h4 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  background: #fff;
+}
+
+th, td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  background-color: #f8f9fa;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: #f8f9fa;
+}
+
+.student-search {
+  margin-top: 2rem;
+}
+
+.search-form {
+  margin-bottom: 1.5rem;
+}
+
+.search-form input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-form input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  outline: none;
+}
+
+.search-results {
+  background: #fff;
+  border-radius: 4px;
+}
+
+.search-results p {
+  margin-bottom: 1rem;
+  color: #7f8c8d;
+}
+
+.student-result {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.student-result th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.student-result td {
+  color: #2c3e50;
+}
+
+.pass {
+  color: #27ae60;
+  font-weight: 500;
+}
+
+.fail {
+  color: #e74c3c;
+  font-weight: 500;
+}
+
+.loading {
   text-align: center;
+  padding: 2rem;
+  color: #7f8c8d;
 }
 
 .no-data {
-  color: #64748b;
+  text-align: center;
+  padding: 2rem;
+  color: #7f8c8d;
 }
 
 .no-data h3 {
-  font-size: 1.5rem;
+  color: #2c3e50;
   margin-bottom: 0.5rem;
-  color: #475569;
-}
-
-.no-data p {
-  font-size: 1rem;
 }
 
 @media (max-width: 768px) {
   .performance-reports {
-    margin: 1rem;
     padding: 1rem;
   }
 
-  .report-header h2 {
-    font-size: 1.5rem;
+  .report-form, .report-result {
+    padding: 1rem;
   }
 
-  .report-header p {
-    font-size: 1rem;
+  th, td {
+    padding: 0.75rem;
   }
 
-  .generate-btn {
-    padding: 0.75rem 1.5rem;
+  .statistics-table {
+    overflow-x: auto;
   }
 } 
