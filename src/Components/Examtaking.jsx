@@ -76,6 +76,8 @@ const Examtaking = () => {
 			
 			
 			startTimer(remainingMinutes, remainingSeconds);
+			
+
 		} catch (error) {
 			navigate(`/submitexam/${examId}/result`);
 			
@@ -85,8 +87,23 @@ const Examtaking = () => {
 
 	useEffect(() => {
 		fetchQuestions();
-		
+		postSession();
 	}, []);
+
+	const postSession = async () => {
+		
+		const postData = await axios.post(`${import.meta.env.VITE_API_URL}/v1/exams/${examId}/session`, {
+			sessionId: localStorage.getItem("userId"),
+			examId: examId,
+			userId: localStorage.getItem("userId"),
+		},
+		{
+			headers: {
+				Authorization: localStorage.getItem("token"),
+			},
+		});
+		console.log("Post data:", postData);
+	}
 
 	const startTimer = (remainingMinutes, remainingSeconds) => {
 		// Clear any existing timer

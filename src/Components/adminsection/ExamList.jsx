@@ -72,25 +72,143 @@ const ExamList = () => {
 	};
 
 	// Generate PDF
-	const generatePDF = (exam) => {
-		const doc = new jsPDF();
-		const tableData = [
-			[
-				exam.title,
-				exam.description,
-				`${exam.timeLimit} minutes`,
-				new Date(exam.date).toLocaleDateString(),
-				exam.startTime,
-				exam.createdBy?.firstName + " " + exam.createdBy?.lastName,
-			],
-		];
-
-		doc.autoTable({
-			head: [["Title", "Date", "Time", "Registered Students", "Attempted Students","Passed Students","Failed Students", "Created By"]],
+	const generatePDF = async (exam) => {
+		try {
+			// Show loading toast
+			const loadingToast = toast.loading("Generating PDF report...");
 			
-		});
+			// Fetch all results
+			const resultsResponse = await axios.get(
+				`${import.meta.env.VITE_API_URL}/v1/admin/results`,
+				{
+					headers: {
+						Authorization: token,
+					},
+				}
+			);
+			console.log(resultsResponse.data.results);
+			// Filter results for this specific exam
+			const examResults = resultsResponse.data.results.filter(
+				(result) => result.exam === exam._id
+			);
 
-		doc.save(`${exam.title}_exam_details.pdf`);
+			console.log(examResults);
+			// Calculate statistics
+			const registeredStudents = examResults?.length || 0;
+			const attemptedStudents = examResults.length;
+			const passedStudents = examResults.filter(result => result.status === "Pass").length;
+			const failedStudents = attemptedStudents - passedStudents;
+			
+			// Create PDF document
+			const doc = new jsPDF();
+			
+			// Add title
+			doc.setFontSize(18);
+			doc.text(`Exam Report: ${exam.title}`, 14, 22);
+			
+			// Add exam details
+			doc.setFontSize(12);
+			doc.text(`Date: ${new Date(exam.date).toLocaleDateString()}`, 14, 32);
+			doc.text(`Time: ${exam.startTime}`, 14, 38);
+			doc.text(`Duration: ${exam.timeLimit} minutes`, 14, 44);
+			doc.text(`Created by: ${exam.createdBy?.firstName} ${exam.createdBy?.lastName}`, 14, 50);
+			
+			// Add statistics table
+			doc.autoTable({
+				startY: 60,
+				head: [["Statistics", "Count"]],
+				body: [
+					["Registered Students", registeredStudents.toString()],
+					["Attempted Students", attemptedStudents.toString()],
+					["Passed Students", passedStudents.toString()],
+					["Failed Students", failedStudents.toString()],
+					["Pass Rate", attemptedStudents > 0 ? `${Math.round((passedStudents / attemptedStudents) * 100)}%` : "N/A"],
+				],
+				theme: 'grid',
+				headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+				styles: { fontSize: 12 }
+			});
+			
+			// Add description
+			if (exam.description) {
+				const finalY = doc.lastAutoTable.finalY + 10;
+				doc.text("Exam Description:", 14, finalY);
+				doc.setFontSize(10);
+				doc.text(exam.description, 14, finalY + 6);
+			}
+			
+			// Add results table if there are attempted exams
+			if (attemptedStudents > 0) {
+				const startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : 120;
+				
+				doc.setFontSize(14);
+				doc.text("Student Results", 14, startY + 10);
+				
+				// Fetch student details for each result
+				const resultDataPromises = examResults.map(async (result) => {
+					try {
+						// Try to fetch student details
+						const studentResponse = await axios.get(
+							`${import.meta.env.VITE_API_URL}/v1/admin/users/${result.student}`,
+							{
+								headers: {
+									Authorization: token,
+								},
+							}
+						);
+						
+						const student = studentResponse.data.user;
+						const studentName = student ? `${student.firstName} ${student.lastName}` : "Unknown Student";
+						const totalQuestions = result.questionsAnswered ? result.questionsAnswered.length : 0;
+						const percentage = totalQuestions > 0 ? Math.round((result.score / totalQuestions) * 100) : 0;
+						
+						return [
+							studentName,
+							result.score,
+							totalQuestions,
+							`${percentage}%`,
+							result.status,
+							new Date(result.createdAt).toLocaleString()
+						];
+					} catch (error) {
+						// If we can't get student details, still show the result with minimal info
+						return [
+							`Student ID: ${result.student}`,
+							result.score,
+							result.questionsAnswered ? result.questionsAnswered.length : 'N/A',
+							'N/A',
+							result.status,
+							new Date(result.createdAt).toLocaleString()
+						];
+					}
+				});
+				
+				// Wait for all student data to be fetched
+				const resultData = await Promise.all(resultDataPromises);
+				
+				doc.autoTable({
+					startY: startY,
+					head: [["Student Name", "Score", "Total Questions", "Percentage", "Status", "Submitted At"]],
+					body: resultData,
+					theme: 'grid',
+					headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+					styles: { fontSize: 10 },
+					columnStyles: {
+						5: { cellWidth: 40 }
+					}
+				});
+			}
+			
+			// Save the PDF
+			doc.save(`${exam.title}_exam_report.pdf`);
+			
+			// Dismiss loading toast and show success
+			toast.dismiss(loadingToast);
+			toast.success("PDF report generated successfully!");
+		} catch (error) {
+			console.error("Error generating PDF:", error);
+			toast.error("Failed to generate PDF report");
+		}
 	};
 
 	// Handle File Import

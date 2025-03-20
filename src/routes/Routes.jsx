@@ -26,6 +26,7 @@ import StateManagerReports from '../Components/stateManager/StateManagerReport';
 import StateManagerLogin from '../Components/stateManager/StateManagerLogin';
 import CityManagerLogin from '../Components/cityManager/CityManagerLogin';
 import CityManagerReport from '../Components/cityManager/CityManagerReport';
+import SeeChapterWeitghage from '../Components/adminsection/SeeChapterWeitghage';
 const Routes = createBrowserRouter(
 	createRoutesFromElements(
 		<Route element={<Layout />}>
@@ -41,7 +42,7 @@ const Routes = createBrowserRouter(
 			<Route path="/exam/:examId" element={<Examtaking />} />
 			<Route path="/submitexam/:examId/result" element={<SubmittedExam />} />
 			<Route path="/examInstrctions/:examId" element={<ExamInstructions />} />
-
+			<Route path="/seechapterweightage" element={<SeeChapterWeitghage />} />
 			{/* Protected Routes for Admin */}
 			<Route path="/dashboard" element={<Dashboard />} />
 			<Route path="/admindashboard" element={<AdminDashboard />} />

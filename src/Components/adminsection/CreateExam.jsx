@@ -9,9 +9,10 @@ const CreateExam = () => {
 	const [timeLimit, setTimeLimit] = useState("");
 	const [questionSets, setQuestionSets] = useState([]);
 	const [availableQuestionSets, setAvailableQuestionSets] = useState([]);
+	const [filteredQuestionSets, setFilteredQuestionSets] = useState([]);
 	const [date, setDate] = useState("");
 	const [startTime, setStartTime] = useState("");
-	const [level, setLevel] = useState(1);
+	const [level, setLevel] = useState("1");
 	const [Status, setStatus] = useState("Not Started");
 	const [totalQuestions, setTotalQuestions] = useState("");
 
@@ -38,6 +39,12 @@ const CreateExam = () => {
 
 		fetchQuestionSets();
 	}, []);
+
+	useEffect(() => {
+		console.log(availableQuestionSets);
+		// Filter question sets based on the selected level
+		setFilteredQuestionSets(availableQuestionSets.filter(set => String(set.level) === level));
+	}, [level, availableQuestionSets]);
 
 	const handleToggleQuestionSet = (id) => {
 		if (questionSets.includes(id)) {
@@ -80,7 +87,7 @@ const CreateExam = () => {
 			setQuestionSets([]);
 			setDate("");
 			setStartTime("");
-			setLevel(1);
+			setLevel("1");
 			setTotalQuestions("");
 			toast.success("Exam created successfully!");
 		} catch (error) {
@@ -175,7 +182,7 @@ const CreateExam = () => {
 			<div className="question-sets-container">
 				<h4 className="question-sets-title">Select Question Sets</h4>
 				<ul className="question-sets-list">
-					{availableQuestionSets.map((set) => (
+					{filteredQuestionSets.map((set) => (
 						<li key={set._id} className="question-set-item">
 							<label className="question-set-label">
 								<input

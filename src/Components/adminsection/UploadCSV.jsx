@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PlusCircleIcon, TrashIcon } from "@heroicons/react/outline"; // Import TrashIcon
+import { PlusCircleIcon, TrashIcon, DownloadIcon } from "@heroicons/react/outline"; // Import DownloadIcon
 import "../../assets/css/UploadCSV.css";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -43,6 +43,35 @@ const UploadCSV = () => {
   // Trigger file input when custom upload button is clicked
   const handleFileClick = () => {
     document.getElementById("file-input").click();
+  };
+
+  // Download CSV template function
+  const downloadCSVTemplate = () => {
+    // Define headers for CSV
+    const headers = ["Roll No", "firstName", "lastName", "email", "level", "school", "schoolId"];
+    
+    // Create CSV content
+    const csvContent = headers.join(",") + "\n" + 
+                       "123456,John,Doe,john.doe@example.com,High School,Sample School,SCH001";
+    
+    // Create a blob with the CSV content
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    
+    // Create a link element
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    // Set link properties
+    link.setAttribute("href", url);
+    link.setAttribute("download", "students_template.csv");
+    
+    // Append to body and trigger click
+    document.body.appendChild(link);
+    link.click();
+    
+    // Clean up
+    document.body.removeChild(link);
+    toast.success("CSV template downloaded");
   };
 
   const uploadStudents = async (file) => {
@@ -149,38 +178,15 @@ const UploadCSV = () => {
     <div className="upload-csv">
       <h1>Register Users</h1>
 
-      {/* Delete All Users Button */}
-      <div className="delete-all-section">
-        <button 
-          onClick={() => setShowConfirmDialog(true)}
-          className="delete-all-btn"
-        >
-          <TrashIcon className="icon" /> Delete All Users
-        </button>
-      </div>
-
-      {/* Confirmation Dialog */}
-      {showConfirmDialog && (
-        <div className="confirmation-dialog">
-          <div className="dialog-content">
-            <h3>Delete All Users</h3>
-            <p>Are you sure you want to delete all users? This action cannot be undone.</p>
-            <div className="dialog-buttons">
-              <button onClick={() => setShowConfirmDialog(false)} className="cancel-btn">
-                Cancel
-              </button>
-              <button onClick={handleDeleteAllUsers} className="confirm-btn">
-                Confirm Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Custom Upload Button */}
+      {/* Upload and Download Section */}
       <div className="upload-section">
         <button onClick={handleFileClick} className="custom-upload-btn">
           <PlusCircleIcon className="icon" /> Upload CSV
+        </button>
+        
+        {/* Download CSV Template Button */}
+        <button onClick={downloadCSVTemplate} className="download-template-btn">
+          <DownloadIcon className="icon" /> Download CSV Template
         </button>
 
         {/* Hidden file input */}
@@ -203,14 +209,16 @@ const UploadCSV = () => {
       </div>
 
       {/* Users per page selection */}
-      <div className="users-per-page">
-        <label htmlFor="users-per-page">Users per page:</label>
-        <select id="users-per-page" value={usersPerPage} onChange={handleUsersPerPageChange}>
-          <option value={5}>5</option>
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
-        </select>
+
+
+      {/* Delete All Users Button */}
+      <div className="delete-all-section">
+        <button 
+          onClick={() => setShowConfirmDialog(true)}
+          className="delete-all-btn"
+        >
+          <TrashIcon className="icon" /> Delete All Users
+        </button>
       </div>
 
       {/* User Data Table for Students */}
@@ -239,8 +247,19 @@ const UploadCSV = () => {
               ))}
             </tbody>
           </table>
+          <div className="users-per-page">
+        <label htmlFor="users-per-page">Users per page:</label>
+        <select id="users-per-page" value={usersPerPage} onChange={handleUsersPerPageChange}>
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+          <option value={50}>50</option>
+        </select>
+      </div>
         </div>
+        
       )}
+
 
       {/* Pagination Controls */}
       <div className="pagination">
@@ -254,6 +273,24 @@ const UploadCSV = () => {
           </button>
         ))}
       </div>
+
+      {/* Confirmation Dialog */}
+      {showConfirmDialog && (
+        <div className="confirmation-dialog">
+          <div className="dialog-content">
+            <h3>Delete All Users</h3>
+            <p>Are you sure you want to delete all users? This action cannot be undone.</p>
+            <div className="dialog-buttons">
+              <button onClick={() => setShowConfirmDialog(false)} className="cancel-btn">
+                Cancel
+              </button>
+              <button onClick={handleDeleteAllUsers} className="confirm-btn">
+                Confirm Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

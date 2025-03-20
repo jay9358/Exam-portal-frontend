@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PlusCircleIcon, TrashIcon } from "@heroicons/react/outline";
+import { PlusCircleIcon, TrashIcon, DownloadIcon } from "@heroicons/react/outline";
 import "../../assets/css/UploadCSV.css";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -39,6 +39,35 @@ const UploadCSVSchool = () => {
   // Trigger file input when custom upload button is clicked
   const handleFileClick = () => {
     document.getElementById("file-input").click();
+  };
+
+  // Download CSV template function
+  const downloadCSVTemplate = () => {
+    // Define headers for CSV
+    const headers = ["SchoolID", "SchoolName", "State", "City"];
+    
+    // Create CSV content
+    const csvContent = headers.join(",") + "\n" + 
+                       "SCH001,Example High School,California,Los Angeles";
+    
+    // Create a blob with the CSV content
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    
+    // Create a link element
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    // Set link properties
+    link.setAttribute("href", url);
+    link.setAttribute("download", "schools_template.csv");
+    
+    // Append to body and trigger click
+    document.body.appendChild(link);
+    link.click();
+    
+    // Clean up
+    document.body.removeChild(link);
+    toast.success("CSV template downloaded");
   };
 
   const uploadSchools = async (file) => {
@@ -117,10 +146,15 @@ const UploadCSVSchool = () => {
     <div className="upload-csv">
       <h1>Register Schools</h1>
 
-      {/* Custom Upload Button */}
+      {/* Upload and Download Section */}
       <div className="upload-section">
         <button onClick={handleFileClick} className="custom-upload-btn">
           <PlusCircleIcon className="icon" /> Upload CSV
+        </button>
+        
+        {/* Download CSV Template Button */}
+        <button onClick={downloadCSVTemplate} className="download-template-btn">
+          <DownloadIcon className="icon" /> Download CSV Template
         </button>
 
         {/* Hidden file input */}
@@ -142,16 +176,7 @@ const UploadCSVSchool = () => {
         )}
       </div>
 
-      {/* Users per page selection */}
-      <div className="users-per-page">
-        <label htmlFor="users-per-page">Users per page:</label>
-        <select id="users-per-page" value={usersPerPage} onChange={handleUsersPerPageChange}>
-          <option value={5}>5</option>
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
-        </select>
-      </div>
+
 
       {/* User Data Table for Schools */}
       {currentSchools.length > 0 && (
@@ -177,6 +202,16 @@ const UploadCSVSchool = () => {
               ))}
             </tbody>
           </table>
+                {/* Users per page selection */}
+      <div className="users-per-page">
+        <label htmlFor="users-per-page">Users per page:</label>
+        <select id="users-per-page" value={usersPerPage} onChange={handleUsersPerPageChange}>
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+          <option value={50}>50</option>
+        </select>
+      </div>
         </div>
       )}
 

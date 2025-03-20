@@ -3,12 +3,11 @@ import "../../assets/css/ManageExams.css";
 import axios from "axios";
 
 const ManageExams = () => {
-  const [examName, setExamName] = useState("");
-  const [examDate, setExamDate] = useState("");
   const [exams, setExams] = useState([]);
-  const [selectedExam, setSelectedExam] = useState(""); // State for selected exam
-
-  // Fetch exams from backend API and filter by status
+  const [users, setUsers] = useState([]);
+  const [sessions, setSessions] = useState([]);
+  const [results, setResults] = useState([]);
+  // Fetch exams from backend API
   const fetchExams = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/v1/admin/exams`, {
@@ -16,52 +15,74 @@ const ManageExams = () => {
           Authorization: localStorage.getItem('token'),
         },
       });
-      // Access the exams property from the response data
+      
       if (Array.isArray(response.data.exams)) {
-        setExams(response.data.exams); // Set exams to the array from the response
+        console.log(response.data.exams);
+        setExams(response.data.exams);
       } else {
         console.error('Unexpected response format:', response.data);
-        setExams([]); // Reset to an empty array if the format is unexpected
+        setExams([]);
       }
     } catch (error) {
       console.error('Error fetching exams:', error.response?.data?.message || error.message);
-      setExams([]); // Reset to an empty array on error
+      setExams([]);
     }
   };
 
   useEffect(() => {
-    // Initial fetch
     fetchExams();
-
-    // Set up interval to fetch every minute (60000 milliseconds)
+    fetchsession();
+    fetchusers();
+    fetchResults();
+    
     const intervalId = setInterval(() => {
       fetchExams();
+      fetchsession();
     }, 60000);
-
-    // Cleanup function to clear the interval when component unmounts
     return () => clearInterval(intervalId);
-  }, []); // Empty dependency array means this effect runs once on mount
+    
+  }, []);
 
-  // Create a new exam
-
-
-  // Start an exam
-  const handleStartExam = async (examId) => {
+  const fetchusers = async () => {
     try {
-      const response = await axios.patch(`${import.meta.env.VITE_API_URL}/v1/admin/exams/${examId}`, {
-        Status: "Pending", // Update status to Pending
-      }, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/v1/admin/users/role/Student`, {
         headers: {
           Authorization: localStorage.getItem('token'),
         },
       });
-      // Update the exams list with the updated exam
-      setExams((prevExams) => prevExams.map(exam => (exam._id === examId ? response.data : exam)));
+      setUsers(response.data.users);
     } catch (error) {
-      console.error('Error starting exam:', error.response?.data?.message || error.message);
+      console.error('Error fetching users:', error.response?.data?.message || error.message);
     }
   };
-
+  const fetchResults = async () => {
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/v1/admin/results`, {
+      headers: {
+        Authorization: localStorage.getItem('token'),
+      },
+    });
+    console.log(response.data);
+    if (Array.isArray(response.data.results)) {
+      setResults(response.data.results);
+    } else {
+      console.error('Unexpected response format:', response.data);
+      setResults([]);
+    }
+  }
+  const fetchsession = async () => {
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/v1/exams/getAllSessions`, {
+      headers: {
+        Authorization: localStorage.getItem('token'),
+      },
+    });
+    console.log(response.data);
+    if (Array.isArray(response.data.sessions)) {
+      setSessions(response.data.sessions);
+    } else {
+      console.error('Unexpected response format:', response.data);
+      setSessions([]);
+    }
+  }
   // Delete an exam
   const handleDeleteExam = async (examId) => {
     try {
@@ -70,33 +91,63 @@ const ManageExams = () => {
           Authorization: localStorage.getItem('token'),
         },
       });
-      // Remove the deleted exam from the state
       setExams((prevExams) => prevExams.filter((exam) => exam._id !== examId));
     } catch (error) {
       console.error('Error deleting exam:', error.response?.data?.message || error.message);
     }
   };
 
-  // Filter exams by status
-  const notStartedExams = exams.filter(exam => exam.Status === "Not Started");
-  const pendingExams = exams.filter(exam => exam.Status === "Pending");
-  const completedExams = exams.filter(exam => exam.Status === "Completed");
+  // Determine exam status based on current time
+  const currentTime = new Date();
+  const notStartedExams = exams.filter(exam => {
+    const examStartTime = new Date(exam.date);
+    const [hours, minutes] = exam.startTime.split(':').map(Number);
+    examStartTime.setHours(hours, minutes, 0, 0);
+    return examStartTime > currentTime;
+  });
+  const pendingExams = exams.filter(exam => {
+    const examStartTime = new Date(exam.date);
+    const [hours, minutes] = exam.startTime.split(':').map(Number);
+    examStartTime.setHours(hours, minutes, 0, 0);
+    const examEndTime = new Date(examStartTime.getTime() + exam.timeLimit * 60000);
+    return examStartTime <= currentTime && examEndTime > currentTime;
+  });
+  const completedExams = exams.filter(exam => {
+    const examStartTime = new Date(exam.date);
+    const [hours, minutes] = exam.startTime.split(':').map(Number);
+    examStartTime.setHours(hours, minutes, 0, 0);
+    const examEndTime = new Date(examStartTime.getTime() + exam.timeLimit * 60000);
+    return examEndTime <= currentTime;
+  });
+
+  // Function to get registered, attempting, and completed students count
+  const getStudentCounts = (exam) => {
+    const registeredStudents = users.filter(user => user.level === exam.level).length;
+    const attemptingStudents = sessions.filter(session => session.examId === exam._id).length;
+    console.log(results);
+    const completedStudents = results.filter(result => result.exam === exam._id).length;
+    return { registeredStudents, attemptingStudents, completedStudents };
+  };
 
   return (
     <div className="manageexams">
-
       <h4>Not Started Exams</h4>
       <ul className="exam-list">
         {notStartedExams.length > 0 ? (
-          notStartedExams.map((exam) => (
-            <li key={exam._id} className="exam-item">
-              {exam.title} : {new Date(exam.date).toLocaleDateString()} {exam.startTime}
-              <div className="exam-actions">
-              
-                <button onClick={() => handleDeleteExam(exam._id)}>Delete</button>
-              </div>
-            </li>
-          ))
+          notStartedExams.map((exam) => {
+            const { registeredStudents, attemptingStudents, completedStudents } = getStudentCounts(exam);
+            return (
+              <li key={exam._id} className="exam-item">
+                {exam.title} : {new Date(exam.date).toLocaleDateString()} {exam.startTime}
+                <div>Registered Students: {registeredStudents}</div>
+                <div>Attempting Students: {attemptingStudents}</div>
+                <div>Completed Students: {completedStudents}</div>
+                <div className="exam-actions">
+                  <button onClick={() => handleDeleteExam(exam._id)}>Delete</button>
+                </div>
+              </li>
+            );
+          })
         ) : (
           <p>No Not Started exams found</p>
         )}
@@ -105,14 +156,20 @@ const ManageExams = () => {
       <h4>Pending Exams</h4>
       <ul className="exam-list">
         {pendingExams.length > 0 ? (
-          pendingExams.map((exam) => (
-            <li key={exam._id} className="exam-item">
-              {exam.title} - {new Date(exam.date).toLocaleDateString()}
-              <div className="exam-actions">
-                <button onClick={() => handleDeleteExam(exam._id)}>Delete</button>
-              </div>
-            </li>
-          ))
+          pendingExams.map((exam) => {
+            const { registeredStudents, attemptingStudents, completedStudents } = getStudentCounts(exam);
+            return (
+              <li key={exam._id} className="exam-item">
+                {exam.title} - {new Date(exam.date).toLocaleDateString()}
+                <div>Registered Students: {registeredStudents}</div>
+                <div>Attempting Students: {attemptingStudents}</div>
+                <div>Completed Students: {completedStudents}</div>
+                <div className="exam-actions">
+                  <button onClick={() => handleDeleteExam(exam._id)}>Delete</button>
+                </div>
+              </li>
+            );
+          })
         ) : (
           <p>No Pending exams found</p>
         )}
@@ -121,20 +178,24 @@ const ManageExams = () => {
       <h4>Completed Exams</h4>
       <ul className="exam-list">
         {completedExams.length > 0 ? (
-          completedExams.map((exam) => (
-            <li key={exam._id} className="exam-item">
-              {exam.title} - {new Date(exam.date).toLocaleDateString()}
-              <div className="exam-actions">
-                <button onClick={() => handleDeleteExam(exam._id)}>Delete</button>
-              </div>
-            </li>
-          ))
+          completedExams.map((exam) => {
+            const { registeredStudents, attemptingStudents, completedStudents } = getStudentCounts(exam);
+            return (
+              <li key={exam._id} className="exam-item">
+                {exam.title} - {new Date(exam.date).toLocaleDateString()}
+                <div>Registered Students: {registeredStudents}</div>
+                <div>Attempting Students: {attemptingStudents}</div>
+                <div>Completed Students: {completedStudents}</div>
+                <div className="exam-actions">
+                  <button onClick={() => handleDeleteExam(exam._id)}>Delete</button>
+                </div>
+              </li>
+            );
+          })
         ) : (
           <p>No Completed exams found</p>
         )}
       </ul>
-
-  
     </div>
   );
 };

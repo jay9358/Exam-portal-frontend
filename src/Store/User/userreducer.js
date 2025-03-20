@@ -24,8 +24,13 @@ export const loginaccount = createAsyncThunk("/login", async (data) => {
 		});
 		const resp = await response;
 		localStorage.setItem(
-			"semester",
-			resp?.payload?.data?.userDetails?.semester || 1
+			"level",
+			resp?.payload?.data?.userDetails?.level || 1
+		);
+		console.log(resp.data.userDetails._id);
+		localStorage.setItem(
+			"userId",
+			resp.data.userDetails._id || 1
 		);
 		return resp;
 	} catch (err) {

@@ -15,32 +15,40 @@ const SubmittedExam = () => {
 	const [result, setResult] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
+	const fetchResult = async () => {
+		try {
+			const response = await axios.get(
+				`${import.meta.env.VITE_API_URL}/v1/exams/${examId}/result`,
+				{
+					headers: {
+						Authorization: localStorage.getItem("token"), // Ensure token is set
+					},
+				}
+			);
+			setResult(response.data.resultData);
+			console.log(response.data.resultData);
 
+		} catch (err) {
+			setError(err.response?.data?.message || "Error fetching exam result");
+			console.log(err.response);
+		} finally {
+			setLoading(false);
+		}
+	};
 	useEffect(() => {
-		const fetchResult = async () => {
-			try {
-				const response = await axios.get(
-					`${import.meta.env.VITE_API_URL}/v1/exams/${examId}/result`,
-					{
-						headers: {
-							Authorization: localStorage.getItem("token"), // Ensure token is set
-						},
-					}
-				);
-				setResult(response.data.resultData);
-				console.log(response.data.resultData);
+		sessionStorage.clear();
 
-			} catch (err) {
-				setError(err.response?.data?.message || "Error fetching exam result");
-				console.log(err.response);
-			} finally {
-				setLoading(false);
-			}
-		};
-
+		deletesession();
 		fetchResult();
 	}, [examId]);
-
+	const deletesession = async () => {
+		const response = await axios.delete(`${import.meta.env.VITE_API_URL}/v1/exams/${localStorage.getItem("userId")}/sessionDelete`, {
+			headers: {
+				Authorization: localStorage.getItem("token"),
+			},
+		});
+		console.log("Session deleted:", response);
+	}
 	if (loading) return <p>Loading...</p>;
 	if (error) return <p>Error: {error}</p>;
 

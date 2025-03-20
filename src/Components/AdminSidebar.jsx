@@ -52,6 +52,12 @@ export default function AdminSidebar() {
               <span>Manage Exams</span>
             </Link>
           </NavItem>
+          <NavItem>
+            <ListIcon className="icon" />
+            <Link to="/manageexam">
+              <span>Exam Status</span>
+            </Link>
+          </NavItem>
 
           {/* Question Management */}
           <NavHeader>Questions</NavHeader>
@@ -59,6 +65,12 @@ export default function AdminSidebar() {
             <PencilAltIcon className="icon" />
             <Link to="/managequestionsets">
               <span>Question Sets</span>
+            </Link>
+          </NavItem>
+          <NavItem>
+            <ChartBarIcon className="icon" />
+            <Link to="/seechapterweightage">
+              <span>Chapter Weightage</span>
             </Link>
           </NavItem>
 

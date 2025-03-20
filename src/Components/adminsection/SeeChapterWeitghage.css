@@ -1,0 +1,76 @@
+.question-sets-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    
+}
+.container {
+    
+
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #ffffff;
+    justify-content: flex-start;
+    border-radius: 8px;
+  
+}
+
+.header{
+    display: flex;
+    flex-direction: row;
+    width: 100%;    
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding: 10px;
+    color: #000;
+}
+.header h1{
+    font-size: 30px;
+    font-weight: 600;
+    color: #000;
+}
+
+select {
+    padding: 10px;
+    font-size: 16px;
+ 
+    border-radius: 4px;
+    justify-content: center;
+    border: 1px solid #ccc;
+}
+.Charts{
+    display: flex;
+    flex-direction: inherit;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+.pie-chart-container{
+    
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+}
+.stacked-bar-chart-container{
+ 
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+.bar-chart {
+    width: 100%;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+} 

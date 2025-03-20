@@ -184,11 +184,14 @@ export const AssignanExamtoSchool = createAsyncThunk(
 	}
 );
 export const GetallExam = createAsyncThunk("/exams/allExam", async () => {
-	//console.log(data);
+	
 	try {
 		const response = axiosInstance.post(
 			"/v1/auth/exams",
-			{ level: localStorage.getItem("level") || 1 },
+			{ 
+				level: localStorage.getItem("level") || 1,
+				
+			},
 			{
 				headers: {
 					Authorization: `Bearer ${token}`,
