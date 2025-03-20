@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";// Make sure axios is installed
+import { useState, useEffect, useMemo } from "react";// Make sure axios is installed
 import "../../assets/css/ManageExams.css";
 import axios from "axios";
 
@@ -30,20 +30,20 @@ const ManageExams = () => {
   };
 
   useEffect(() => {
-    fetchExams();
-    fetchsession();
-    fetchusers();
-    fetchResults();
-    
+    const fetchData = async () => {
+      await Promise.all([fetchExams(), fetchUsers(), fetchSessions(), fetchResults()]);
+    };
+    fetchData();
+
     const intervalId = setInterval(() => {
       fetchExams();
-      fetchsession();
+      fetchSessions();
     }, 60000);
+
     return () => clearInterval(intervalId);
-    
   }, []);
 
-  const fetchusers = async () => {
+  const fetchUsers = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/v1/admin/users/role/Student`, {
         headers: {
@@ -55,6 +55,7 @@ const ManageExams = () => {
       console.error('Error fetching users:', error.response?.data?.message || error.message);
     }
   };
+
   const fetchResults = async () => {
     const response = await axios.get(`${import.meta.env.VITE_API_URL}/v1/admin/results`, {
       headers: {
@@ -69,7 +70,8 @@ const ManageExams = () => {
       setResults([]);
     }
   }
-  const fetchsession = async () => {
+
+  const fetchSessions = async () => {
     const response = await axios.get(`${import.meta.env.VITE_API_URL}/v1/exams/getAllSessions`, {
       headers: {
         Authorization: localStorage.getItem('token'),
@@ -99,26 +101,26 @@ const ManageExams = () => {
 
   // Determine exam status based on current time
   const currentTime = new Date();
-  const notStartedExams = exams.filter(exam => {
+  const notStartedExams = useMemo(() => exams.filter(exam => {
     const examStartTime = new Date(exam.date);
     const [hours, minutes] = exam.startTime.split(':').map(Number);
     examStartTime.setHours(hours, minutes, 0, 0);
     return examStartTime > currentTime;
-  });
-  const pendingExams = exams.filter(exam => {
+  }), [exams, currentTime]);
+  const pendingExams = useMemo(() => exams.filter(exam => {
     const examStartTime = new Date(exam.date);
     const [hours, minutes] = exam.startTime.split(':').map(Number);
     examStartTime.setHours(hours, minutes, 0, 0);
     const examEndTime = new Date(examStartTime.getTime() + exam.timeLimit * 60000);
     return examStartTime <= currentTime && examEndTime > currentTime;
-  });
-  const completedExams = exams.filter(exam => {
+  }), [exams, currentTime]);
+  const completedExams = useMemo(() => exams.filter(exam => {
     const examStartTime = new Date(exam.date);
     const [hours, minutes] = exam.startTime.split(':').map(Number);
     examStartTime.setHours(hours, minutes, 0, 0);
     const examEndTime = new Date(examStartTime.getTime() + exam.timeLimit * 60000);
     return examEndTime <= currentTime;
-  });
+  }), [exams, currentTime]);
 
   // Function to get registered, attempting, and completed students count
   const getStudentCounts = (exam) => {
