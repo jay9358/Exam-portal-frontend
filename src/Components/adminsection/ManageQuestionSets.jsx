@@ -26,7 +26,8 @@ const ManageQuestionSets = () => {
 					headers: { Authorization: localStorage.getItem("token") },
 				}
 			);
-			setQuestionSets(response.data.questionSets);
+			const questionSets = response.data.questionSets.filter(set => set.type === "Question Bank");
+			setQuestionSets(questionSets);
 		} catch (error) {
 			toast.error(`Error fetching question sets: ${error.message}`);
 		}
