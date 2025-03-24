@@ -40,12 +40,7 @@ export default function AdminSidebar() {
               <span>Create Exam</span>
             </Link>
           </NavItem>
-          {/* <NavItem>
-            <ClipboardCheck className="icon" />
-            <Link to="/manageexam">
-              <span>Manage Exams</span>
-            </Link>
-          </NavItem> */}
+
           <NavItem>
             <ListIcon className="icon" />
             <Link to="/examlist">
@@ -60,22 +55,24 @@ export default function AdminSidebar() {
           </NavItem>
 
           {/* Question Management */}
-          <NavHeader>Questions</NavHeader>
+          <NavHeader>Question Sets</NavHeader>
+
           <NavItem>
-            <PencilAltIcon className="icon" />
-            <Link to="/managequestionsets">
-              <span>Question Sets</span>
-            </Link>
-          </NavItem>
-          <NavItem>
-            <ChartBarIcon className="icon" />
-            <Link to="/seechapterweightage">
-              <span>Chapter Weightage</span>
+            <ListIcon className="icon" />
+            <Link to="/reviewquestionset">
+              <span>Review Question Set</span>
             </Link>
           </NavItem>
 
+
           {/* Reports */}
           <NavHeader>Reports</NavHeader>
+          <NavItem>
+            <PencilAltIcon className="icon" />
+            <Link to="/managequestionsets">
+              <span>Upload Question Bank</span>
+            </Link>
+          </NavItem>
           <NavItem>
             <ChartBarIcon className="icon" />
             <Link to="/uploadcsv">
@@ -88,6 +85,7 @@ export default function AdminSidebar() {
               <span>Register Schools</span>
             </Link>
           </NavItem>
+
           <NavItem>
             <ChartBarIcon className="icon" />
             <Link to="/performancereports">

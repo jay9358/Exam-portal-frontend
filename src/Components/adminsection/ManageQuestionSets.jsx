@@ -12,7 +12,7 @@ const ManageQuestionSets = () => {
 	// States for new exam set CSV upload
 	const [newCsvSetName, setNewCsvSetName] = useState("");
 	const [csvExamSetFile, setCsvExamSetFile] = useState(null);
-	const [examSetLevel, setExamSetLevel] = useState("medium");
+	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
 		fetchQuestionSets();
@@ -111,74 +111,71 @@ const ManageQuestionSets = () => {
 			toast.error("Please enter a new exam set name and select a CSV file.");
 			return;
 		}
-		try {
-			// First, create a new question set with the provided name.
-			const createResponse = await axios.post(
-				`${import.meta.env.VITE_API_URL}/v1/admin/questionSets`,
-				{ setName: newCsvSetName, level: examSetLevel },
-				{ headers: { Authorization: localStorage.getItem("token") } }
-			);
-			const newSetId = createResponse.data.questionSet._id;
 
-			const reader = new FileReader();
-			reader.onload = async (e) => {
-				const text = e.target.result;
-				const rows = parseCSV(text);
-				for (const row of rows) {
-					const questionText = row["Question"];
-					const options = [
-						{ text: row["Option 1"], isCorrect: row["Correct Answer"] === "1" },
-						{ text: row["Option 2"], isCorrect: row["Correct Answer"] === "2" },
-						{ text: row["Option 3"], isCorrect: row["Correct Answer"] === "3" },
-						{ text: row["Option 4"], isCorrect: row["Correct Answer"] === "4" },
-					];
-					const Chapter = row["Chapter"];
-					const Difficulty = row["Difficulty"];
+		setIsLoading(true);
+
+		const reader = new FileReader();
+		reader.onload = async (e) => {
+			const text = e.target.result;
+			const rows = parseCSV(text);
+			const questions = [];
+
+			for (const row of rows) {
+				const questionText = row["Question"];
+				const options = [
+					{ text: row["Option 1"], isCorrect: row["Correct Answer"] === "1" },
+					{ text: row["Option 2"], isCorrect: row["Correct Answer"] === "2" },
+					{ text: row["Option 3"], isCorrect: row["Correct Answer"] === "3" },
+					{ text: row["Option 4"], isCorrect: row["Correct Answer"] === "4" },
+				];
+				const Chapter = row["Chapter"];
+				const Difficulty = row["Difficulty"];
+				questions.push({ questionText, options, chapter: Chapter, difficulty: Difficulty });
+			}
+			const type = "Question Bank";
+			try {
+				const createResponse = await axios.post(
+					`${import.meta.env.VITE_API_URL}/v1/admin/questionSets`,
+					{ setName: newCsvSetName, type: type },
+					{ headers: { Authorization: localStorage.getItem("token") } }
+				);
+				const newSetId = createResponse.data.questionSet._id;
+
+				for (const question of questions) {
 					try {
 						await axios.post(
 							`${import.meta.env.VITE_API_URL}/v1/admin/questionSets/questions`,
-							{ questionText, options, setId: newSetId, level: examSetLevel, chapter: Chapter, difficulty: Difficulty },
+							{ ...question, setId: newSetId },
 							{ headers: { Authorization: localStorage.getItem("token") } }
 						);
 					} catch (error) {
-						toast.error(
-							`Error adding question: ${
-								error.response?.data?.message || error.message
-							}`
-						);
+						throw new Error(`Error adding question: ${error.response?.data?.message || error.message}`);
 					}
 				}
-				toast.success(
-					"Exam set CSV processed and questions added successfully!"
-				);
+
+				toast.success("Exam set CSV processed and questions added successfully!");
 				setNewCsvSetName("");
 				setCsvExamSetFile(null);
-				setExamSetLevel("medium");
 				fetchQuestionSets();
-			};
-			reader.readAsText(csvExamSetFile);
-		} catch (error) {
-			toast.error(
-				`Error uploading exam set CSV: ${
-					error.response?.data?.message || error.message
-				}`
-			);
-		}
+			} catch (error) {
+				toast.error(`Error uploading exam set CSV: ${error.message}`);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+		reader.readAsText(csvExamSetFile);
 	};
 
 	// Function to download a sample CSV format
 	const downloadSampleCSV = () => {
-		const headers = ["Question", "Option 1", "Option 2", "Option 3", "Option 4", "Correct Answer"];
+		const headers = ["Question", "Option 1", "Option 2", "Option 3", "Option 4", "Correct Answer", "Chapter", "Difficulty"];
 		const sampleData = [
-			"What is React?", "A JavaScript library", "A programming language", "A database", "A web server", "1",
-			"Which of these is not a JavaScript framework?", "Angular", "Vue", "React", "Java", "4"
+			"What is the capital of France?", "Paris", "London", "Berlin", "Madrid", "1", "Geography", "1"
 		];
 		
 		// Create CSV content
 		const csvContent = headers.join(",") + "\n" + 
-			sampleData.slice(0, 6).join(",") + "\n" + 
-			sampleData.slice(6).join(",");
-		
+			sampleData.join(",");
 		// Create a blob and download
 		const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
 		const link = document.createElement("a");
@@ -198,17 +195,15 @@ const ManageQuestionSets = () => {
 				Manage Question Sets
 			</h2>
 
-			{/* Create Question Set (Manual) */}
-			
-					<button
-						onClick={downloadSampleCSV}
-						className="button button-secondary">
-						Download CSV Format
-					</button>
-				
-	
-				{/* Upload Exam Set CSV (New Addon) */}
-				<div className="section-card">
+			{isLoading && <div className="loader">Loading...</div>}
+
+			<button
+				onClick={downloadSampleCSV}
+				className="button button-secondary">
+				Download CSV Format
+			</button>
+
+			<div className="section-card">
 				<h3 className="section-title">Upload Exam Set CSV</h3>
 				<input
 					type="text"
@@ -217,15 +212,7 @@ const ManageQuestionSets = () => {
 					placeholder="Enter new exam set name"
 					className="input-field"
 				/>
-				<select
-					value={examSetLevel}
-					onChange={(e) => setExamSetLevel(e.target.value)}
-					className="select-field"
-				>
-					<option value="easy">Easy</option>
-					<option value="medium">Medium</option>
-					<option value="hard">Hard</option>
-				</select>
+
 				<input
 					type="file"
 					accept=".csv"
@@ -245,13 +232,13 @@ const ManageQuestionSets = () => {
 			{/* Upload CSV into an Existing Question Set */}
 			<div className="section-card">
 				<h3 className="section-title">
-					Upload CSV to Existing Set
+					Upload CSV to Existing Question Bank
 				</h3>
 				<select
 					value={selectedSetId}
 					onChange={(e) => setSelectedSetId(e.target.value)}
 					className="select-field">
-					<option value="">Select a question set</option>
+					<option value="">Select a question Bank</option>
 					{questionSets.map((set) => (
 						<option key={set._id} value={set._id}>
 							{set.setName}

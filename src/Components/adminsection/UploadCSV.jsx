@@ -48,11 +48,11 @@ const UploadCSV = () => {
   // Download CSV template function
   const downloadCSVTemplate = () => {
     // Define headers for CSV
-    const headers = ["Roll No", "firstName", "lastName", "email", "level", "school", "schoolId"];
+    const headers = ["Roll No", "firstName", "lastName", "email","mobileNumber" ,"level", "school", "schoolId","BatchID"];
     
     // Create CSV content
     const csvContent = headers.join(",") + "\n" + 
-                       "123456,John,Doe,john.doe@example.com,High School,Sample School,SCH001";
+                       "123456,John,Doe,john.doe@example.com,9876543210,High School,Sample School,SCH001,BATCH001";
     
     // Create a blob with the CSV content
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -231,18 +231,22 @@ const UploadCSV = () => {
                 <th>Roll No</th>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Phone</th>
                 <th>School</th>
                 <th>Level</th>
+                <th>BatchID</th>
               </tr>
             </thead>
             <tbody>
               {currentUsers.map((student, index) => (
                 <tr key={index}>
                   <td>{student.rollNo || "N/A"}</td>
-                  <td>{student.firstName}</td>
+                  <td>{student.firstName} {student.lastName}</td>
                   <td>{student.email}</td>
+                  <td>{student.mobileNumber || "N/A"}</td>
                   <td>{student.schoolId || "N/A"}</td>
                   <td>{student.level || "N/A"}</td>
+                  <td>{student.batch || "N/A"}</td>
                 </tr>
               ))}
             </tbody>

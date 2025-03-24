@@ -9,12 +9,31 @@ const CreateExam = () => {
 	const [timeLimit, setTimeLimit] = useState("");
 	const [questionSets, setQuestionSets] = useState([]);
 	const [availableQuestionSets, setAvailableQuestionSets] = useState([]);
-	const [filteredQuestionSets, setFilteredQuestionSets] = useState([]);
+	const [batch, setBatch] = useState([]);
 	const [date, setDate] = useState("");
 	const [startTime, setStartTime] = useState("");
 	const [level, setLevel] = useState("1");
 	const [Status, setStatus] = useState("Not Started");
 	const [totalQuestions, setTotalQuestions] = useState("");
+	const [selectedBatch, setSelectedBatch] = useState("");
+	const [questionSetWeights, setQuestionSetWeights] = useState({});
+
+	const fetchBatch = async () => {
+		try {
+			const response = await axios.get(
+				`${import.meta.env.VITE_API_URL}/v1/admin/batches`,
+				{
+					headers: { Authorization: localStorage.getItem("token") },
+				}
+			);
+			// Assuming the response structure is { batches: [...] }
+			console.log(response.data.batches);
+			setBatch(response.data.batches);
+		} catch (error) {
+			console.error("Error fetching batches:", error.response?.data || error.message);
+			toast.error("Failed to fetch batches");
+		}
+	};
 
 	useEffect(() => {
 		const fetchQuestionSets = async () => {
@@ -27,7 +46,10 @@ const CreateExam = () => {
 						},
 					}
 				);
-				setAvailableQuestionSets(response.data.questionSets);
+				const questionSets = response.data.questionSets.filter(set => set.type === "Question Bank");
+				setAvailableQuestionSets(questionSets);
+				console.log(questionSets);
+
 			} catch (error) {
 				console.error(
 					"Error fetching question sets:",
@@ -35,29 +57,48 @@ const CreateExam = () => {
 				);
 				toast.error("Failed to fetch question sets");
 			}
+		
 		};
+	
+		
 
 		fetchQuestionSets();
+		fetchBatch();
+		
 	}, []);
 
-	useEffect(() => {
-		console.log(availableQuestionSets);
-		// Filter question sets based on the selected level
-		setFilteredQuestionSets(availableQuestionSets.filter(set => String(set.level) === level));
-	}, [level, availableQuestionSets]);
 
 	const handleToggleQuestionSet = (id) => {
 		if (questionSets.includes(id)) {
 			setQuestionSets(questionSets.filter((setId) => setId !== id));
+			const updatedWeights = { ...questionSetWeights };
+			delete updatedWeights[id];
+			setQuestionSetWeights(updatedWeights);
 		} else {
 			setQuestionSets([...questionSets, id]);
 		}
 	};
 
+	const handleWeightChange = (id, weight) => {
+		setQuestionSetWeights({
+			...questionSetWeights,
+			[id]: weight,
+		});
+	};
+
 	const handleCreateExam = async () => {
 		try {
-			if (!title || !description || !timeLimit || !date || !startTime || !totalQuestions) {
+			if (!title || !description || !timeLimit || !date || !startTime || !totalQuestions || !selectedBatch) {
 				toast.error("Please fill in all required fields");
+				return;
+			}
+
+			// Calculate total weightage
+			const totalWeightage = Object.values(questionSetWeights).reduce((sum, weight) => sum + parseFloat(weight || 0), 0);
+
+			// Check if total weightage exceeds 100
+			if (totalWeightage > 100) {
+				toast.error("Total weightage cannot exceed 100");
 				return;
 			}
 
@@ -72,7 +113,9 @@ const CreateExam = () => {
 					startTime,
 					level,
 					totalQuestions: parseInt(totalQuestions),
-					Status
+					Status,
+					batch: selectedBatch,
+					questionSetWeights, // Include weights in the request
 				},
 				{
 					headers: {
@@ -89,6 +132,7 @@ const CreateExam = () => {
 			setStartTime("");
 			setLevel("1");
 			setTotalQuestions("");
+			setQuestionSetWeights({});
 			toast.success("Exam created successfully!");
 		} catch (error) {
 			console.error("Error creating exam:", error);
@@ -144,6 +188,7 @@ const CreateExam = () => {
 					<option value="1">Easy</option>
 					<option value="2">Medium</option>
 					<option value="3">Hard</option>
+					<option value="4">Trainer</option>
 				</select>
 			</div>
 
@@ -178,11 +223,32 @@ const CreateExam = () => {
 					required
 				/>
 			</div>
+			<div className="form-group">
+				<select
+					type="text"
+					value={selectedBatch}
+					onChange={(e) => setSelectedBatch(e.target.value)}
+					className="form-control"
+					required
+				>
+					<option value="" disabled>
+						Select Batch
+					</option>
+					{batch
+						.filter((batchItem) => batchItem !== null && batchItem !== undefined)
+						.map((batchItem, index) => (
+							<option key={index} value={batchItem}>
+								{batchItem}
+							</option>
+						))}
+				</select>
+			</div>
+			
 
 			<div className="question-sets-container">
-				<h4 className="question-sets-title">Select Question Sets</h4>
+				<h4 className="question-sets-title">Select Question Banks and Their Weightage</h4>
 				<ul className="question-sets-list">
-					{filteredQuestionSets.map((set) => (
+					{availableQuestionSets.map((set) => (
 						<li key={set._id} className="question-set-item">
 							<label className="question-set-label">
 								<input
@@ -195,6 +261,16 @@ const CreateExam = () => {
 									Set {set.setName}
 								</span>
 							</label>
+							{questionSets.includes(set._id) && (
+								<input
+									type="number"
+									value={questionSetWeights[set._id] || ""}
+									onChange={(e) => handleWeightChange(set._id, e.target.value)}
+									placeholder="Weightage"
+									className="form-control weightage-input"
+									min="0"
+								/>
+							)}
 						</li>
 					))}
 				</ul>

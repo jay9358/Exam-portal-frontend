@@ -26,7 +26,8 @@ export default function SeeChapterWeitghage() {
 					},
 				}
 			);
-			setQuestionSets(response.data.questionSets);
+			const questionSets = response.data.questionSets.filter(set => set.type === "Exam Set");
+			setQuestionSets(questionSets);
 		} catch (error) {
 			console.error("Error fetching question sets:", error);
 		}
