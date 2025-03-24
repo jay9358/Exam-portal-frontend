@@ -1,6 +1,7 @@
 .review-exam-set {
     padding: 20px;
     font-family: Arial, sans-serif;
+    
 }
 
 .review-exam-set h1 {
@@ -11,6 +12,9 @@
 .review-exam-set ul {
     list-style-type: none;
     padding: 0;
+}
+.review-exam-set ul li{
+    
 }
 
 .review-exam-set li {
