@@ -191,7 +191,7 @@ export default function ReviewQuestionSet() {
 						{exam.ApprovalStatus === 'Approved' ? (
 							<span style={{ color: 'green', fontWeight: 'bold' }}>Approved</span>
 						) : (
-							exam.createdBy._id === localStorage.getItem('userId') && <button onClick={() => approveExamSet(exam._id)}>Approve</button>
+							exam.createdBy._id != localStorage.getItem('userId') && <button onClick={() => approveExamSet(exam._id)}>Approve</button>
 						)}
 						
 						<ul>
