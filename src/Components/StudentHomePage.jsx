@@ -13,6 +13,7 @@ export default function StudentSection() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [serverTimeDiff, setServerTimeDiff] = useState(0);
+  const [user,setUser]=useState();
 
   // Add function to validate time against server
   const validateTime = async () => {
@@ -75,7 +76,28 @@ export default function StudentSection() {
 
         const response = await dispatch(GetallExam());
         const exams = response?.payload?.data?.exams || [];
-        setAllExams(exams);
+        // Fetch user details
+        const userId = localStorage.getItem('userId');
+        const userResponse = await axios.get(
+          `${import.meta.env.VITE_API_URL}/v1/admin/user/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        );
+        const user = userResponse.data.user;
+        setUser(user);
+        console.log(user)
+        // Filter exams based on user's batch
+        const filteredExams = exams.filter(exam => {
+            // Check if the exam's batch matches the user's batch and is approved
+            return exam.batch === user.batch && exam.ApprovalStatus === 'Approved';
+        });
+        console.log(filteredExams)
+        // Update allExams state with filtered exams
+        setAllExams(filteredExams);
+        
       } catch (err) {
         setError("Failed to fetch exams. Please try again later.");
         console.error("Error fetching exams:", err);

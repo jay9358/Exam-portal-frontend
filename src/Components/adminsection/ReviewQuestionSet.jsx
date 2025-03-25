@@ -9,7 +9,7 @@ export default function ReviewQuestionSet() {
 	const [loading, setLoading] = useState(true);
 	const [setNames, setSetNames] = useState({});
 	const [questionSets, setQuestionSets] = useState({});
-
+	const [admin,setAdmin]=useState(0);
 	const fetchExams = async () => {
 		const token = localStorage.getItem("token");
 		try {
@@ -186,7 +186,13 @@ export default function ReviewQuestionSet() {
 				{exams.map(exam => (
 					<li key={exam.id}>
 						<strong>{exam.title}</strong> - Batch: {exam.batch}
-						<button onClick={() => approveExamSet(exam.id)}>Approve</button>
+						
+
+						{exam.ApprovalStatus === 'Approved' ? (
+							<span style={{ color: 'green', fontWeight: 'bold' }}>Approved</span>
+						) : (
+							exam.createdBy._id === localStorage.getItem('userId') && <button onClick={() => approveExamSet(exam._id)}>Approve</button>
+						)}
 						
 						<ul>
 							{Object.keys(questionSets).filter(setId => questionSets[setId].exam.toString() === exam._id).map(setId => (

@@ -18,7 +18,9 @@ const ManageExams = () => {
       
       if (Array.isArray(response.data.exams)) {
         console.log(response.data.exams);
-        setExams(response.data.exams);
+        // Filter to only show approved exams
+        const approvedExams = response.data.exams.filter(exam => exam.ApprovalStatus === 'Approved');
+        setExams(approvedExams);
       } else {
         console.error('Unexpected response format:', response.data);
         setExams([]);
