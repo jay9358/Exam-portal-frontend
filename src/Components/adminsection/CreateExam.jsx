@@ -185,9 +185,9 @@ const CreateExam = () => {
 					className="form-control"
 					required
 				>
-					<option value="1">Easy</option>
-					<option value="2">Medium</option>
-					<option value="3">Hard</option>
+					<option value="1">L1-Prarambh</option>
+					<option value="2">L2-Madhyam</option>
+					<option value="3">L3-Uttam</option>
 					<option value="4">Trainer</option>
 				</select>
 			</div>

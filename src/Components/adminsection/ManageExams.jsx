@@ -126,7 +126,7 @@ const ManageExams = () => {
 
   // Function to get registered, attempting, and completed students count
   const getStudentCounts = (exam) => {
-    const registeredStudents = users.filter(user => user.level === exam.level && user.batch==exam.batch).length;
+    const registeredStudents = users.filter(user =>user.batch==exam.batch).length;
     const attemptingStudents = sessions.filter(session => session.examId === exam._id).length;
     console.log(results);
     const completedStudents = results.filter(result => result.exam === exam._id).length;

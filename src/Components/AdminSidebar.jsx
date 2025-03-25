@@ -55,12 +55,12 @@ export default function AdminSidebar() {
           </NavItem>
 
           {/* Question Management */}
-          <NavHeader>Question Sets</NavHeader>
+          <NavHeader>Exam Sets</NavHeader>
 
           <NavItem>
             <ListIcon className="icon" />
             <Link to="/reviewquestionset">
-              <span>Review Question Set</span>
+              <span>Review Exam Sets</span>
             </Link>
           </NavItem>
 
