@@ -303,7 +303,7 @@ export default function ReviewQuestionSet() {
                         ))}
                     </ul>
                   </td>
-                  <td>{exam.createdBy._id}</td>
+                  <td>{exam.createdBy.firstName} {exam.createdBy.lastName}</td>
                   <td>{exam.createdBy._id}</td>
                 </tr>
               ))
