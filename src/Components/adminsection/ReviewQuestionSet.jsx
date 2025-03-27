@@ -231,43 +231,15 @@ export default function ReviewQuestionSet() {
 
   return (
     <>
-      {/* <div className="review-exam-set">
-    	<h1>Review Exam Set</h1>
-    	<ul>
-    		{exams.map(exam => (
-    			<li key={exam.id}>
-    				<strong>{exam.title}</strong> - Batch: {exam.batch}
-
-    				{exam.ApprovalStatus === 'Approved' ? (
-    					<span style={{ color: 'green', fontWeight: 'bold' }}>Approved</span>
-    				) : (
-    					exam.createdBy._id != localStorage.getItem('userId') && <button onClick={() => approveExamSet(exam._id)}>Approve</button>
-    				)}
-
-    				<ul>
-    					{Object.keys(questionSets).filter(setId => questionSets[setId].exam.toString() === exam._id).map(setId => (
-    						<li key={setId}>
-    							{questionSets[setId].setName || "Unknown Set"}
-    							<button onClick={() => generatePDF(questionSets[setId])}>Download Set PDF</button>
-    						</li>
-    					))}
-    				</ul>
-    			</li>
-    		))}
-    	</ul>
-
-    </div> */}
-
       <div className="review-exam-set">
         <h1 className="title"> Review Exam Set</h1>
-
         {/* Batch Filter */}
         <div className="filter-container">
           <input
             type="text"
             id="batch-filter"
             placeholder="Enter batch..."
-			className="bg-light"
+            className="bg-light"
             value={batchFilter}
             onChange={(e) => setBatchFilter(e.target.value)}
           />
@@ -282,7 +254,8 @@ export default function ReviewQuestionSet() {
               <th>Batch</th>
               <th>Approval Status</th>
               <th>Question Sets</th>
-              {/* <th>Actions</th> */}
+              <th>Created By</th>
+              <th>Updated By</th>
             </tr>
           </thead>
           <tbody>
@@ -330,21 +303,13 @@ export default function ReviewQuestionSet() {
                         ))}
                     </ul>
                   </td>
-                  {/* <td>
-                  {exam.createdBy._id !== localStorage.getItem("userId") && (
-                    <button
-                      className="approve-btn"
-                      onClick={() => approveExamSet(exam._id)}
-                    >
-                      Approve
-                    </button>
-                  )}
-                </td> */}
+                  <td>{exam.createdBy._id}</td>
+                  <td>{exam.createdBy._id}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="no-data">
+                <td colSpan="7" className="no-data">
                   No exams found.
                 </td>
               </tr>
