@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import { PlusCircleIcon, TrashIcon, DownloadIcon } from "@heroicons/react/outline";
+import {
+  PlusCircleIcon,
+  TrashIcon,
+  DownloadIcon,
+} from "@heroicons/react/outline";
 import "../../assets/css/UploadCSV.css";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -9,13 +13,18 @@ const UploadCSVSchool = () => {
   const [schools, setSchools] = useState([]); // State to hold fetched schools
   const [usersPerPage, setUsersPerPage] = useState(10); // State for users per page
   const [currentPage, setCurrentPage] = useState(1); // State for current page
+  const [filterText, setFilterText] = useState("");
+  const [filterColumn, setFilterColumn] = useState("name"); 
   const fetchSchools = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/v1/admin/schools`, {
-        headers: {
-          Authorization: localStorage.getItem("token"),
-        },
-      });
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/v1/admin/schools`,
+        {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
+        }
+      );
 
       console.log("Fetched Schools:", response.data);
 
@@ -32,7 +41,6 @@ const UploadCSVSchool = () => {
 
   // Fetch schools on component mount
   useEffect(() => {
-    
     fetchSchools();
   }, []);
 
@@ -45,26 +53,28 @@ const UploadCSVSchool = () => {
   const downloadCSVTemplate = () => {
     // Define headers for CSV
     const headers = ["SchoolID", "SchoolName", "State", "City"];
-    
+
     // Create CSV content
-    const csvContent = headers.join(",") + "\n" + 
-                       "SCH001,Example High School,California,Los Angeles";
-    
+    const csvContent =
+      headers.join(",") +
+      "\n" +
+      "SCH001,Example High School,California,Los Angeles";
+
     // Create a blob with the CSV content
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    
+
     // Create a link element
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
-    
+
     // Set link properties
     link.setAttribute("href", url);
     link.setAttribute("download", "schools_template.csv");
-    
+
     // Append to body and trigger click
     document.body.appendChild(link);
     link.click();
-    
+
     // Clean up
     document.body.removeChild(link);
     toast.success("CSV template downloaded");
@@ -77,7 +87,7 @@ const UploadCSVSchool = () => {
     }
 
     // Validate file type
-    if (!file.name.endsWith('.csv')) {
+    if (!file.name.endsWith(".csv")) {
       toast.error("Please upload a CSV file");
       return;
     }
@@ -98,7 +108,9 @@ const UploadCSVSchool = () => {
       );
 
       if (response.data.successCount > 0) {
-        toast.success(`Successfully registered ${response.data.successCount} schools`);
+        toast.success(
+          `Successfully registered ${response.data.successCount} schools`
+        );
         fetchSchools(); // Fetch updated school list after upload
       }
 
@@ -142,16 +154,22 @@ const UploadCSVSchool = () => {
   // Calculate total pages
   const totalPages = Math.ceil(schools.length / usersPerPage);
 
+  
+
+  // Filtering logic
+  const filteredSchools = currentSchools.filter((school) =>
+    school[filterColumn]?.toLowerCase().includes(filterText.toLowerCase())
+  );
+
   return (
     <div className="upload-csv">
       <h1>Register Schools</h1>
-
       {/* Upload and Download Section */}
       <div className="upload-section">
         <button onClick={handleFileClick} className="custom-upload-btn">
           <PlusCircleIcon className="icon" /> Upload CSV
         </button>
-        
+
         {/* Download CSV Template Button */}
         <button onClick={downloadCSVTemplate} className="download-template-btn">
           <DownloadIcon className="icon" /> Download CSV Template
@@ -175,13 +193,37 @@ const UploadCSVSchool = () => {
           </div>
         )}
       </div>
-
-
-
       {/* User Data Table for Schools */}
+
       {currentSchools.length > 0 && (
         <div className="user-table">
-          <h2>Registered Schools</h2>
+          <h2 className="title"> Registered Schools</h2>
+
+          {/* Filter Section */}
+          <div className="filter-container">
+            <div className="filter-section">
+              <select
+                id="filter-column"
+                value={filterColumn}
+                onChange={(e) => setFilterColumn(e.target.value)}
+                className="filter-select"
+              >
+                <option value="schoolId">School ID</option>
+                <option value="name">School Name</option>
+                <option value="city">City</option>
+                <option value="state">State</option>
+              </select>
+
+              <input
+                type="text"
+                placeholder={`Search ${filterColumn}...`}
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+                className="filter-select"
+              />
+            </div>
+          </div>
+          {/* Table */}
           <table>
             <thead>
               <tr>
@@ -192,7 +234,7 @@ const UploadCSVSchool = () => {
               </tr>
             </thead>
             <tbody>
-              {currentSchools.map((school, index) => (
+              {filteredSchools.map((school, index) => (
                 <tr key={index}>
                   <td>{school.schoolId || "N/A"}</td>
                   <td>{school.name || "N/A"}</td>
@@ -202,20 +244,24 @@ const UploadCSVSchool = () => {
               ))}
             </tbody>
           </table>
-                {/* Users per page selection */}
-      <div className="users-per-page">
-        <label htmlFor="users-per-page">Users per page:</label>
-        <select id="users-per-page" value={usersPerPage} onChange={handleUsersPerPageChange}>
-          <option value={5}>5</option>
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
-        </select>
-      </div>
+
+          {/* Users per page selection */}
+          <div className="users-per-page">
+            <label htmlFor="users-per-page">Users per page:</label>
+            <select
+              id="users-per-page"
+              value={usersPerPage}
+              onChange={handleUsersPerPageChange}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
         </div>
       )}
-
-      {/* Pagination Controls */}
+      ;{/* Pagination Controls */}
       <div className="pagination">
         {Array.from({ length: totalPages }, (_, index) => (
           <button

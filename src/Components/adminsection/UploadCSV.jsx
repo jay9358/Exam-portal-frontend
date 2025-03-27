@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import { PlusCircleIcon, TrashIcon, DownloadIcon } from "@heroicons/react/outline"; // Import DownloadIcon
+import {
+  PlusCircleIcon,
+  TrashIcon,
+  DownloadIcon,
+} from "@heroicons/react/outline"; // Import DownloadIcon
 import "../../assets/css/UploadCSV.css";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -13,12 +17,15 @@ const UploadCSV = () => {
 
   const fetchStudents = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/v1/admin/users/role/Student`, {
-        headers: {
-          Authorization: localStorage.getItem("token"),
-        },
-      });
-      
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/v1/admin/users/role/Student`,
+        {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
+        }
+      );
+
       // Log the response to check its structure
       console.log("Fetched Students:", response.data);
 
@@ -36,7 +43,6 @@ const UploadCSV = () => {
 
   // Fetch students with role "Student" on component mount
   useEffect(() => {
-    
     fetchStudents();
   }, []); // Empty dependency array to run only on mount
 
@@ -48,27 +54,39 @@ const UploadCSV = () => {
   // Download CSV template function
   const downloadCSVTemplate = () => {
     // Define headers for CSV
-    const headers = ["Roll No", "firstName", "lastName", "email","mobileNumber" ,"level", "school", "schoolId","BatchID"];
-    
+    const headers = [
+      "Roll No",
+      "firstName",
+      "lastName",
+      "email",
+      "mobileNumber",
+      "level",
+      "school",
+      "schoolId",
+      "BatchID",
+    ];
+
     // Create CSV content
-    const csvContent = headers.join(",") + "\n" + 
-                       "123456,John,Doe,john.doe@example.com,9876543210,High School,Sample School,SCH001,BATCH001";
-    
+    const csvContent =
+      headers.join(",") +
+      "\n" +
+      "123456,John,Doe,john.doe@example.com,9876543210,High School,Sample School,SCH001,BATCH001";
+
     // Create a blob with the CSV content
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    
+
     // Create a link element
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
-    
+
     // Set link properties
     link.setAttribute("href", url);
     link.setAttribute("download", "students_template.csv");
-    
+
     // Append to body and trigger click
     document.body.appendChild(link);
     link.click();
-    
+
     // Clean up
     document.body.removeChild(link);
     toast.success("CSV template downloaded");
@@ -79,13 +97,13 @@ const UploadCSV = () => {
       toast.error("No file selected for upload.");
       return;
     }
-    
+
     // Validate file type
-    if (!file.name.endsWith('.csv')) {
+    if (!file.name.endsWith(".csv")) {
       toast.error("Please upload a CSV file");
       return;
     }
-    
+
     const formData = new FormData();
     formData.append("file", file);
 
@@ -100,18 +118,20 @@ const UploadCSV = () => {
           },
         }
       );
-      
+
       // Show detailed success message
       if (response.data.successCount > 0) {
-        toast.success(`Successfully registered ${response.data.successCount} students`);
+        toast.success(
+          `Successfully registered ${response.data.successCount} students`
+        );
         fetchStudents(); // Fetch updated student list after upload
       }
-      
+
       // Show errors if any
       if (response.data.errorCount > 0) {
         toast.error(`Failed to register ${response.data.errorCount} students`);
         console.error("Registration errors:", response.data.errors);
-        
+
         // Show first error in toast
         if (response.data.errors && response.data.errors.length > 0) {
           toast.error(`Error example: ${response.data.errors[0].error}`);
@@ -161,7 +181,7 @@ const UploadCSV = () => {
           },
         }
       );
-      
+
       if (response.status === 200) {
         toast.success("All users deleted successfully");
         setStudents([]); // Clear the local state
@@ -174,6 +194,18 @@ const UploadCSV = () => {
     }
   };
 
+  // State for student filtering
+  const [studentFilterText, setStudentFilterText] = useState("");
+  const [studentFilterColumn, setStudentFilterColumn] = useState("rollNo");
+
+  const filteredUsers = studentFilterText
+    ? currentUsers.filter((student) =>
+        student[studentFilterColumn]
+          ?.toLowerCase()
+          .includes(studentFilterText.toLowerCase())
+      )
+    : currentUsers;
+
   return (
     <div className="upload-csv">
       <h1>Register Users</h1>
@@ -183,7 +215,7 @@ const UploadCSV = () => {
         <button onClick={handleFileClick} className="custom-upload-btn">
           <PlusCircleIcon className="icon" /> Upload CSV
         </button>
-        
+
         {/* Download CSV Template Button */}
         <button onClick={downloadCSVTemplate} className="download-template-btn">
           <DownloadIcon className="icon" /> Download CSV Template
@@ -210,10 +242,9 @@ const UploadCSV = () => {
 
       {/* Users per page selection */}
 
-
       {/* Delete All Users Button */}
       <div className="delete-all-section">
-        <button 
+        <button
           onClick={() => setShowConfirmDialog(true)}
           className="delete-all-btn"
         >
@@ -221,10 +252,38 @@ const UploadCSV = () => {
         </button>
       </div>
 
-      {/* User Data Table for Students */}
+      {/* Students Section */}
       {currentUsers.length > 0 && (
         <div className="user-table">
-          <h2>Registered Students</h2>
+          <h2 className="title"> Registered Students</h2>
+
+          {/* Student Filter */}
+          <div className="filter-container">
+            <div className="filter-section">
+              <select
+                id="student-filter-column"
+                value={studentFilterColumn}
+                onChange={(e) => setStudentFilterColumn(e.target.value)}
+                className="filter-select"
+              >
+                <option value="rollNo">Roll No</option>
+                <option value="firstName">Name</option>
+                <option value="email">Email</option>
+                <option value="mobileNumber">Phone</option>
+                <option value="schoolId">School</option>
+                <option value="batch">BatchID</option>
+              </select>
+              <input
+                type="text"
+                placeholder={`Search ${studentFilterColumn}...`}
+                value={studentFilterText}
+                onChange={(e) => setStudentFilterText(e.target.value)}
+                className="filter-input"
+              />
+            </div>
+          </div>
+
+          {/* Student Table */}
           <table>
             <thead>
               <tr>
@@ -238,10 +297,12 @@ const UploadCSV = () => {
               </tr>
             </thead>
             <tbody>
-              {currentUsers.map((student, index) => (
+              {filteredUsers.map((student, index) => (
                 <tr key={index}>
                   <td>{student.rollNo || "N/A"}</td>
-                  <td>{student.firstName} {student.lastName}</td>
+                  <td>
+                    {student.firstName} {student.lastName}
+                  </td>
                   <td>{student.email}</td>
                   <td>{student.mobileNumber || "N/A"}</td>
                   <td>{student.schoolId || "N/A"}</td>
@@ -251,19 +312,23 @@ const UploadCSV = () => {
               ))}
             </tbody>
           </table>
-          <div className="users-per-page">
-        <label htmlFor="users-per-page">Users per page:</label>
-        <select id="users-per-page" value={usersPerPage} onChange={handleUsersPerPageChange}>
-          <option value={5}>5</option>
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
-        </select>
-      </div>
-        </div>
-        
-      )}
 
+          {/* Users per page selection */}
+          <div className="users-per-page">
+            <label htmlFor="users-per-page">Users per page:</label>
+            <select
+              id="users-per-page"
+              value={usersPerPage}
+              onChange={handleUsersPerPageChange}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+        </div>
+      )}
 
       {/* Pagination Controls */}
       <div className="pagination">
@@ -283,9 +348,15 @@ const UploadCSV = () => {
         <div className="confirmation-dialog">
           <div className="dialog-content">
             <h3>Delete All Users</h3>
-            <p>Are you sure you want to delete all users? This action cannot be undone.</p>
+            <p>
+              Are you sure you want to delete all users? This action cannot be
+              undone.
+            </p>
             <div className="dialog-buttons">
-              <button onClick={() => setShowConfirmDialog(false)} className="cancel-btn">
+              <button
+                onClick={() => setShowConfirmDialog(false)}
+                className="cancel-btn"
+              >
                 Cancel
               </button>
               <button onClick={handleDeleteAllUsers} className="confirm-btn">

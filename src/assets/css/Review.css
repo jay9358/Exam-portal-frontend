@@ -36,3 +36,13 @@
 .review-exam-set button:hover {
     background-color: #ddd;
 } 
+
+
+#batch-filter input[type="text"], input[type="number"] {
+    background: transparent;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    padding: 8px;
+    resize: vertical;
+    height: 30pt;
+}
