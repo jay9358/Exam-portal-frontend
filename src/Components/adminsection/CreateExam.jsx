@@ -9,7 +9,6 @@ const CreateExam = () => {
 	const [timeLimit, setTimeLimit] = useState("");
 	const [questionSets, setQuestionSets] = useState([]);
 	const [availableQuestionSets, setAvailableQuestionSets] = useState([]);
-	const [batch, setBatch] = useState([]);
 	const [date, setDate] = useState("");
 	const [startTime, setStartTime] = useState("");
 	const [level, setLevel] = useState("1");
@@ -17,6 +16,7 @@ const CreateExam = () => {
 	const [totalQuestions, setTotalQuestions] = useState("");
 	const [selectedBatch, setSelectedBatch] = useState("");
 	const [questionSetWeights, setQuestionSetWeights] = useState({});
+	const [batch, setBatch] = useState([]);
 
 	const fetchBatch = async () => {
 		try {
