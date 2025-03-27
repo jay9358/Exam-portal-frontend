@@ -196,7 +196,7 @@ const ManageQuestionSets = () => {
 				Manage Question Sets
 			</h2>
 
-			{isLoading && <div className="loader">Loading...</div>}
+			
 
 			<button
 				onClick={downloadSampleCSV}
@@ -221,11 +221,13 @@ const ManageQuestionSets = () => {
 					className="file-input"
 				/>
 				<div className="button-container">
+				{isLoading? <div className="loader">Loading...</div>:
 					<button
 						onClick={handleCsvExamSetUpload}
 						className="button button-primary">
 						Upload Exam Set CSV
 					</button>
+				}
 
 				</div>
 			</div>
