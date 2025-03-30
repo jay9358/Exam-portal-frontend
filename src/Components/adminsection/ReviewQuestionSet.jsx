@@ -60,10 +60,11 @@ export default function ReviewQuestionSet() {
 
   const approveExamSet = async (id) => {
     const token = localStorage.getItem("token");
+    const user=localStorage.getItem("userId")
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_URL}/v1/admin/exams/${id}/approve`,
-        {},
+        `${import.meta.env.VITE_API_URL}/v1/admin/exams/${id}/approve/${user}`,
+        {user},
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -304,7 +305,7 @@ export default function ReviewQuestionSet() {
                     </ul>
                   </td>
                   <td>{exam.createdBy.firstName} {exam.createdBy.lastName}</td>
-                  <td>{exam.createdBy._id}</td>
+                  <td>{exam.approvedby}</td>
                 </tr>
               ))
             ) : (

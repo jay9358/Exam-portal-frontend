@@ -3,6 +3,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import "../../assets/css/PerformanceReports.css";
 import { Search } from "lucide-react";
+import certificateTemplate from "../../assets/certificate.jpg";
 
 const PerformanceReports = () => {
   // List of Indian states
@@ -365,6 +366,8 @@ const PerformanceReports = () => {
   const [selectedExam, setSelectedExam] = useState("");
   const [batch, setBatch] = useState([]);
   const [selectedBatch, setSelectedBatch] = useState("");
+  const [generatingCertificate, setGeneratingCertificate] = useState(false);
+  
   // Fetch schools from API
   const fetchAllSchools = async () => {
     try {
@@ -386,7 +389,8 @@ const PerformanceReports = () => {
 
   useEffect(() => {
     fetchAllSchools();
-  }, []);
+    fetchBatch();
+    }, []);
 
   useEffect(() => {
     if (selectedState && selectedCity && schools.length > 0) {
@@ -430,9 +434,9 @@ const PerformanceReports = () => {
   };
 
   const calculateStatistics = (results) => {
-    console.log(results);
+    
     if (!results || results.length === 0) return null;
-    console.log("ds");
+    
     const totalStudents = results.length;
     const passedStudents = results.filter(
       (result) => result.status === "Pass"
@@ -476,22 +480,38 @@ const PerformanceReports = () => {
 
   const handleStudentSearch = (searchValue) => {
     setStudentSearch(searchValue);
-
-    if (!reportData || !reportData.users) return;
-
+    
+    if (!reportData || !reportData.users || !reportData.results) return;
+    
     const searchTerm = searchValue.toLowerCase().trim();
+    let matchingStudents = [];
+    
+    if (searchTerm === "") {
+      setFilteredStudents([]);
+      return;
+    }
 
-    const matchingStudents = reportData.users.filter(
-      (student) =>
-        student.rollNo?.toLowerCase().includes(searchTerm) ||
-        student.firstName?.toLowerCase().includes(searchTerm) ||
-        student.lastName?.toLowerCase().includes(searchTerm) ||
-        `${student.firstName} ${student.lastName}`
+    // Create a map of results by student ID for quick lookup
+    const resultsByStudentId = reportData.results.reduce((acc, result) => {
+      acc[result.student] = result;
+      return acc;
+    }, {});
+
+    // Search through users and combine with their results
+    matchingStudents = reportData.users
+      .filter((student) =>
+        (student.rollNo || '').toLowerCase().includes(searchTerm) ||
+        (student.firstName || '').toLowerCase().includes(searchTerm) ||
+        (student.lastName || '').toLowerCase().includes(searchTerm) ||
+        `${student.firstName || ''} ${student.lastName || ''}`
           .toLowerCase()
           .includes(searchTerm)
-    );
+      )
+      .map(user => ({
+        ...user,
+        examResult: resultsByStudentId[user._id] || null
+      }));
 
-    // Update the filtered list dynamically
     setFilteredStudents(matchingStudents);
   };
 
@@ -517,14 +537,24 @@ const PerformanceReports = () => {
           },
         }
       );
-
+      
       setReportData(response.data.data);
       setUser(response.data.data.users);
       setResult(response.data.data.results);
 
-      // Set filtered students to the entire list initially
-      setFilteredStudents(response.data.data.users);
+      // Create a map of results by student ID for quick lookup
+      const resultsByStudentId = response.data.data.results.reduce((acc, result) => {
+        acc[result.student] = result;
+        return acc;
+      }, {});
 
+      // Map all users with their results
+      const initialFilteredStudents = response.data.data.users.map(user => ({
+        ...user,
+        examResult: resultsByStudentId[user._id] || null
+      }));
+
+      setFilteredStudents(initialFilteredStudents);
       setShowReport(true);
     } catch (error) {
       console.error("Error generating report:", error);
@@ -532,6 +562,61 @@ const PerformanceReports = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const generateCertificate = (student) => {
+    return async () => {
+      setGeneratingCertificate(true);
+      try {
+        // Get the certificate template image
+        const certificateImg = new Image();
+        certificateImg.src = certificateTemplate;
+        certificateImg.crossOrigin = "anonymous";
+
+        // Create canvas
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Wait for image to load
+        await new Promise((resolve, reject) => {
+          certificateImg.onload = () => {
+            canvas.width = certificateImg.width;
+            canvas.height = certificateImg.height;
+            
+            // Draw certificate template
+            ctx.drawImage(certificateImg, 0, 0);
+
+            // Configure text style for student name
+            ctx.font = 'bold 36px "Times New Roman"';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textAlign = 'center';
+
+            // Add student name - positioned above "This is to certify that"
+            const studentName = `${student.firstName} ${student.lastName}`;
+            ctx.fillText(studentName, canvas.width/2, canvas.height/2 + 110);
+
+            resolve();
+          };
+          certificateImg.onerror = (e) => {
+            console.error('Error loading image:', e);
+            reject(new Error('Failed to load certificate template'));
+          };
+        });
+
+        // Convert to PNG and download
+        const dataUrl = canvas.toDataURL('image/png', 1.0);
+        const link = document.createElement('a');
+        link.download = `${student.firstName}_${student.lastName}_certificate.png`;
+        link.href = dataUrl;
+        link.click();
+
+      } catch (error) {
+        console.error('Error generating certificate:', error);
+        toast.error('Failed to generate certificate: ' + error.message);
+      } finally {
+        setGeneratingCertificate(false);
+      }
+    };
   };
 
   const fetchBatch = async () => {
@@ -763,36 +848,6 @@ const PerformanceReports = () => {
                   </div>
                 </div>
 
-                {/* {filteredStudents.length > 0 ? (
-                  <div className="search-results">
-                    <table className="student-result">
-                      <thead>
-                        <tr>
-                          <th>Roll No</th>
-                          <th>Name</th>
-                          <th>Level</th>
-                          <th>Generated Certificate</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredStudents.map((student, index) => (
-                          <tr key={student._id || index}>
-                            <td>{student.rollNo}</td>
-                            <td>{`${student.firstName} ${student.lastName}`}</td>
-                            <td>{student.level}</td>
-                            <td>
-                              <button className="generate-certificate-btn">
-                                Generate Certificate
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : studentSearch ? (
-                  <p>No students found matching {studentSearch}</p>
-                ) : null} */}
                 <>
                   {filteredStudents.length > 0 ? (
                     <div className="search-results">
@@ -801,7 +856,7 @@ const PerformanceReports = () => {
                           <tr>
                             <th>Roll No</th>
                             <th>Name</th>
-                            <th>Level</th>
+                            <th>Marks</th>
                             <th>Generated Certificate</th>
                           </tr>
                         </thead>
@@ -810,10 +865,14 @@ const PerformanceReports = () => {
                             <tr key={student._id || index}>
                               <td>{student.rollNo}</td>
                               <td>{`${student.firstName} ${student.lastName}`}</td>
-                              <td>{student.level}</td>
+                              <td>{student.examResult ? student.examResult.score : 'Not Attempted'}</td>
                               <td>
-                                <button className="generate-certificate-btn">
-                                  Generate Certificate
+                                <button 
+                                  className="generate-certificate-btn"
+                                  disabled={!student.examResult || student.examResult.status !== "Pass" || generatingCertificate}
+                                  onClick={generateCertificate(student)}
+                                >
+                                  {generatingCertificate ? "Generating..." : "Generate Certificate"}
                                 </button>
                               </td>
                             </tr>

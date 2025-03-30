@@ -88,25 +88,61 @@ const CreateExam = () => {
 
 	const handleCreateExam = async () => {
 		try {
-			if (!title || !description || !timeLimit || !date || !startTime || !totalQuestions || !selectedBatch) {
+			// Basic field validation
+			if (!title.trim() || !description.trim() || !timeLimit || !date || !startTime || !totalQuestions || !selectedBatch) {
 				toast.error("Please fill in all required fields");
 				return;
 			}
 
-			// Calculate total weightage
-			const totalWeightage = Object.values(questionSetWeights).reduce((sum, weight) => sum + parseFloat(weight || 0), 0);
+			// Validate time limit is positive
+			if (timeLimit <= 0) {
+				toast.error("Time limit must be greater than 0");
+				return;
+			}
 
-			// Check if total weightage exceeds 100
-			if (totalWeightage > 100) {
-				toast.error("Total weightage cannot exceed 100");
+			// Validate total questions is positive
+			if (totalQuestions <= 0) {
+				toast.error("Total questions must be greater than 0");
+				return;
+			}
+
+			// Validate at least one question set is selected
+			if (questionSets.length === 0) {
+				toast.error("Please select at least one question bank");
+				return;
+			}
+
+			// Validate all selected question sets have weights
+			const missingWeights = questionSets.some(id => !questionSetWeights[id]);
+			if (missingWeights) {
+				toast.error("Please provide weightage for all selected question banks");
+				return;
+			}
+
+			// Calculate total weightage
+			const totalWeightage = Object.values(questionSetWeights).reduce(
+				(sum, weight) => sum + parseFloat(weight || 0),
+				0
+			);
+
+			// Check if total weightage equals 100
+			if (totalWeightage !== 100) {
+				toast.error("Total weightage must equal 100");
+				return;
+			}
+
+			// Validate date is not in the past
+			const examDate = new Date(`${date}T${startTime}`);
+			if (examDate < new Date()) {
+				toast.error("Exam date and time cannot be in the past");
 				return;
 			}
 
 			const response = await axios.post(
 				`${import.meta.env.VITE_API_URL}/v1/admin/exams`,
 				{
-					title,
-					description,
+					title: title.trim(),
+					description: description.trim(),
 					timeLimit,
 					questionSets,
 					date,
@@ -115,15 +151,16 @@ const CreateExam = () => {
 					totalQuestions: parseInt(totalQuestions),
 					Status,
 					batch: selectedBatch,
-					questionSetWeights, // Include weights in the request
+					questionSetWeights,
 				},
 				{
 					headers: {
 						Authorization: localStorage.getItem("token"),
-					},
+					}
 				}
 			);
-			
+
+			// Reset form only if exam creation was successful
 			setTitle("");
 			setDescription("");
 			setTimeLimit("");
@@ -134,9 +171,10 @@ const CreateExam = () => {
 			setTotalQuestions("");
 			setQuestionSetWeights({});
 			toast.success("Exam created successfully!");
+			
 		} catch (error) {
 			console.error("Error creating exam:", error);
-			toast.error("Failed to create exam");
+			toast.error(error.response?.data?.message || "Failed to create exam");
 		}
 	};
 
