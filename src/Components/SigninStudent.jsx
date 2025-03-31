@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { loginaccount, OTPSending } from "../Store/User/userreducer";
+import { loginaccount } from "../Store/User/userreducer";
 import { useDispatch } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import '../assets/css/StudentLogin.css';
 
 export default function SigninStudent() {
-    const [data, setData] = useState({ email: "", otp: "" });
+    const [data, setData] = useState({ rollNumber: "", password: "" });
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
@@ -37,13 +37,17 @@ export default function SigninStudent() {
 
     const handleLogin = async () => {
         try {
-            if (!data.email || !data.otp) {
+            if (!data.rollNumber || !data.password) {
                 toast.error("Please fill all fields");
                 return;
             }
 
             setLoading(true);
-            const loginData = { contact: data.email, otp: data.otp, flag: "Student" };
+            const loginData = { 
+                rollNumber: data.rollNumber, 
+                password: data.password, 
+                flag: "Student" 
+            };
             const action = await dispatch(loginaccount(loginData));
 
             if (action.type.endsWith('/fulfilled')) {
@@ -69,87 +73,6 @@ export default function SigninStudent() {
         }
     };
 
-    const handleGenerateOtp = async () => {
-        try {
-            if (!data.email) {
-                toast.error("Please enter your email");
-                return;
-            }
-
-            setLoading(true);
-            const action = await dispatch(OTPSending({ contact: data.email }));
-            
-            // Log for debugging
-            console.log('OTP Action:', {
-                type: action.type,
-                error: action.error,
-                payload: action.payload
-            });
-
-            // Handle rejected action first
-            if (action.type.endsWith('/rejected')) {
-                // Handle 404 specifically
-                if (action.error?.response?.status === 404) {
-                    toast.error("Email not found or invalid");
-                    return;
-                }
-
-                // Handle other rejection cases
-                let errorMessage = "Failed to send OTP";
-                if (typeof action.error === 'string') {
-                    errorMessage = action.error;
-                } else if (action.error?.message) {
-                    errorMessage = action.error.message;
-                } else if (action.error?.response?.data?.message) {
-                    errorMessage = action.error.response.data.message;
-                }
-                
-                toast.error(errorMessage);
-                return;
-            }
-
-            // Handle fulfilled action
-            if (action.type.endsWith('/fulfilled')) {
-                // Handle undefined payload
-                if (!action.payload) {
-                    toast.error("Server error: No response received");
-                    return;
-                }
-
-                // Handle success case
-                if (action.payload.success) {
-                    toast.success("OTP sent successfully!");
-                    return;
-                }
-
-                // Handle error in success response
-                let message = "Failed to send OTP";
-                if (typeof action.payload === 'string') {
-                    message = action.payload;
-                } else if (action.payload.message) {
-                    message = String(action.payload.message);
-                }
-                toast.error(message);
-                return;
-            }
-
-            // Handle unexpected action type
-            toast.error("Unexpected response from server");
-        } catch (error) {
-            // Handle any unexpected errors
-            let errorMessage = "An unexpected error occurred";
-            if (typeof error === 'string') {
-                errorMessage = error;
-            } else if (error?.message) {
-                errorMessage = String(error.message);
-            }
-            toast.error(errorMessage);
-            console.error('OTP Error:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
@@ -162,35 +85,28 @@ export default function SigninStudent() {
 
                 <div className="signin-form">
                     <div className="form-group">
-                        <label htmlFor="email" className="form-label">Email, Phone, or Username</label>
+                        <label htmlFor="rollNumber" className="form-label">Roll Number</label>
                         <input
-                            id="email"
-                            name="email"
+                            id="rollNumber"
+                            name="rollNumber"
                             type="text"
-                            value={data.email}
-                            onChange={(e) => setData({ ...data, email: e.target.value })}
-                            placeholder="Enter your email"
+                            value={data.rollNumber}
+                            onChange={(e) => setData({ ...data, rollNumber: e.target.value })}
+                            placeholder="Enter your roll number"
                             className="form-input"
                             disabled={loading}
                         />
-                        <button 
-                            onClick={handleGenerateOtp} 
-                            className="generate-otp-btn"
-                            disabled={loading}
-                        >
-                            {loading ? "Sending..." : "Generate OTP"}
-                        </button>
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="otp" className="form-label">Enter OTP</label>
+                        <label htmlFor="password" className="form-label">Password</label>
                         <div className="input-with-icon">
                             <input
-                                id="otp"
+                                id="password"
                                 type={showPassword ? "text" : "password"}
-                                value={data.otp}
-                                onChange={(e) => setData({ ...data, otp: e.target.value })}
-                                placeholder="Enter OTP"
+                                value={data.password}
+                                onChange={(e) => setData({ ...data, password: e.target.value })}
+                                placeholder="Enter your password"
                                 className="form-input"
                                 disabled={loading}
                             />

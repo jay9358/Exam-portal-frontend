@@ -28,6 +28,7 @@ import CityManagerLogin from '../Components/cityManager/CityManagerLogin';
 import CityManagerReport from '../Components/cityManager/CityManagerReport';
 import SeeChapterWeitghage from '../Components/adminsection/SeeChapterWeitghage';
 import ReviewQuestionSet from '../Components/adminsection/ReviewQuestionSet';
+import GeneratePassword from '../Components/adminsection/GeneratePassword';
 const Routes = createBrowserRouter(
 	createRoutesFromElements(
 		<Route element={<Layout />}>
@@ -61,6 +62,7 @@ const Routes = createBrowserRouter(
 			<Route path="/statemanagerlogin" element={<StateManagerLogin />} />
 			<Route path="/citymanagerlogin" element={<CityManagerLogin />} />
 			<Route path="/citymanagerreports" element={<CityManagerReport />} />
+			<Route path='/generate' element={<GeneratePassword/>}></Route>
 			{/* Protected Routes for Student */}
 			<Route path="/studhome" element={<StudentSection />} />
 		</Route>

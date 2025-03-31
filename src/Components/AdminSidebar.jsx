@@ -6,7 +6,7 @@ import {
   LogoutIcon,
   UserIcon,
 } from "@heroicons/react/outline";
-import { ClipboardCheck, ListIcon, FilePlus, FileMinus } from "lucide-react";
+import { ClipboardCheck, ListIcon, FilePlus, FileMinus, KeyIcon } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -99,6 +99,12 @@ export default function AdminSidebar() {
             <UserIcon className="icon" />
             <Link to="/manageuser">
               <span>Manage Users</span>
+            </Link>
+          </NavItem>
+          <NavItem>
+            <KeyIcon className="icon" />
+            <Link to="/generate">
+              <span>Generate Password</span>
             </Link>
           </NavItem>
         </ul>
