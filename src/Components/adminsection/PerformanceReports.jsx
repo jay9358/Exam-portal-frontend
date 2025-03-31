@@ -484,21 +484,16 @@ const PerformanceReports = () => {
     if (!reportData || !reportData.users || !reportData.results) return;
     
     const searchTerm = searchValue.toLowerCase().trim();
-    let matchingStudents = [];
-    
-    if (searchTerm === "") {
-      setFilteredStudents([]);
-      return;
-    }
 
-    // Create a map of results by student ID for quick lookup
+    // Create a map of results by student ID with status
     const resultsByStudentId = reportData.results.reduce((acc, result) => {
-      acc[result.student] = result;
+      const status = result.score >= 40 ? "Pass" : "Fail";
+      acc[result.student] = { ...result, status };
       return acc;
     }, {});
 
-    // Search through users and combine with their results
-    matchingStudents = reportData.users
+    // Search and map students with their results and status
+    const matchingStudents = reportData.users
       .filter((student) =>
         (student.rollNo || '').toLowerCase().includes(searchTerm) ||
         (student.firstName || '').toLowerCase().includes(searchTerm) ||
@@ -507,10 +502,14 @@ const PerformanceReports = () => {
           .toLowerCase()
           .includes(searchTerm)
       )
-      .map(user => ({
-        ...user,
-        examResult: resultsByStudentId[user._id] || null
-      }));
+      .map(user => {
+        const examResult = resultsByStudentId[user._id];
+        return {
+          ...user,
+          examResult: examResult || null,
+          status: examResult ? examResult.status : "Not Attempted"
+        };
+      });
 
     setFilteredStudents(matchingStudents);
   };
@@ -538,23 +537,31 @@ const PerformanceReports = () => {
         }
       );
       
-      setReportData(response.data.data);
-      setUser(response.data.data.users);
-      setResult(response.data.data.results);
+      console.log("API Response:", response.data.data);
 
-      // Create a map of results by student ID for quick lookup
+      // Create a map of results by student ID with status
       const resultsByStudentId = response.data.data.results.reduce((acc, result) => {
-        acc[result.student] = result;
+        // Determine status based on score
+        const status = result.score >= 40 ? "Pass" : "Fail";
+        acc[result.student] = { ...result, status };
         return acc;
       }, {});
 
-      // Map all users with their results
-      const initialFilteredStudents = response.data.data.users.map(user => ({
-        ...user,
-        examResult: resultsByStudentId[user._id] || null
-      }));
+      // Map all users with their results and status
+      const initialFilteredStudents = response.data.data.users.map(user => {
+        const examResult = resultsByStudentId[user._id];
+        return {
+          ...user,
+          examResult: examResult || null,
+          status: examResult ? examResult.status : "Not Attempted"
+        };
+      });
 
+      setReportData(response.data.data);
+      setUser(response.data.data.users);
+      setResult(response.data.data.results);
       setFilteredStudents(initialFilteredStudents);
+      console.log(initialFilteredStudents)
       setShowReport(true);
     } catch (error) {
       console.error("Error generating report:", error);
@@ -857,26 +864,42 @@ const PerformanceReports = () => {
                             <th>Roll No</th>
                             <th>Name</th>
                             <th>Marks</th>
+                            <th>Status</th>
                             <th>Generated Certificate</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {currentStudents.map((student, index) => (
-                            <tr key={student._id || index}>
-                              <td>{student.rollNo}</td>
-                              <td>{`${student.firstName} ${student.lastName}`}</td>
-                              <td>{student.examResult ? student.examResult.score : 'Not Attempted'}</td>
-                              <td>
-                                <button 
-                                  className="generate-certificate-btn"
-                                  disabled={!student.examResult || student.examResult.status !== "Pass" || generatingCertificate}
-                                  onClick={generateCertificate(student)}
-                                >
-                                  {generatingCertificate ? "Generating..." : "Generate Certificate"}
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
+                          {currentStudents.map((student, index) => {
+                            console.log("Rendering student:", student);
+                            return (
+                              <tr key={student._id || index}>
+                                <td>{student.rollNo}</td>
+                                <td>{`${student.firstName} ${student.lastName}`}</td>
+                                <td>{student.examResult ? student.examResult.score : 'Not Attempted'}</td>
+                                <td style={{
+                                  color: student.examResult.status === "Pass" ? "#4CAF50" : 
+                                         student.status === "Fail" ? "#f44336" : "#757575",
+                                  fontWeight: "bold",
+                                  backgroundColor: student.status === "Pass" ? "rgba(76, 175, 80, 0.1)" : 
+                                                  student.status === "Fail" ? "rgba(244, 67, 54, 0.1)" : "rgba(117, 117, 117, 0.1)",
+                                  padding: "4px 8px",
+                                  borderRadius: "4px",
+                                  textAlign: "center"
+                                }}>
+                                  {student.examResult.status}
+                                </td>
+                                <td>
+                                  <button 
+                                    className="generate-certificate-btn"
+                                    disabled={student.status !== "Pass" || generatingCertificate}
+                                    onClick={generateCertificate(student)}
+                                  >
+                                    {generatingCertificate ? "Generating..." : "Generate Certificate"}
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
 
