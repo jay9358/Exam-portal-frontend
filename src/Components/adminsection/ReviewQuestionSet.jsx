@@ -11,7 +11,8 @@ export default function ReviewQuestionSet() {
   const [questionSets, setQuestionSets] = useState({});
   const [admin, setAdmin] = useState(0);
   const [usersPerPage, setUsersPerPage] = useState(10); // State for users per page
-  const [currentPage, setCurrentPage] = useState(1); // State for current page
+  const [currentPage, setCurrentPage] = useState(1);
+  const [approve,setApprove]=useState(); // State for current page
   const fetchExams = async () => {
     const token = localStorage.getItem("token");
     try {
@@ -24,6 +25,7 @@ export default function ReviewQuestionSet() {
         }
       );
       setExams(response.data.exams);
+    
       console.log(response.data.exams);
     } catch (error) {
       console.error(
@@ -31,6 +33,7 @@ export default function ReviewQuestionSet() {
         error.response?.data || error.message
       );
     }
+    
   };
 
   const fetchQuestionSetsByType = async () => {
@@ -60,11 +63,12 @@ export default function ReviewQuestionSet() {
 
   const approveExamSet = async (id) => {
     const token = localStorage.getItem("token");
-    const user=localStorage.getItem("userId")
+    const userId=localStorage.getItem("userId")
+    console.log()
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_URL}/v1/admin/exams/${id}/approve/${user}`,
-        {user},
+        `${import.meta.env.VITE_API_URL}/v1/admin/exams/${id}/approve`,
+        {userId},
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -72,6 +76,7 @@ export default function ReviewQuestionSet() {
         }
       );
       console.log(`Approved exam set with id: ${id}`);
+      
       fetchExams(); // Refresh the list after approval
     } catch (error) {
       console.error(
@@ -79,6 +84,7 @@ export default function ReviewQuestionSet() {
         error.response?.data || error.message
       );
     }
+
   };
 
   const generatePDF = async (set) => {
@@ -256,6 +262,7 @@ export default function ReviewQuestionSet() {
               <th>Approval Status</th>
               <th>Question Sets</th>
               <th>Created By</th>
+            
               <th>Updated By</th>
             </tr>
           </thead>
@@ -305,7 +312,7 @@ export default function ReviewQuestionSet() {
                     </ul>
                   </td>
                   <td>{exam.createdBy.firstName} {exam.createdBy.lastName}</td>
-                  <td>{exam.approvedby}</td>
+                  <td>{exam.approvedByName}</td>
                 </tr>
               ))
             ) : (

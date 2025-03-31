@@ -246,6 +246,7 @@ const ExamList = () => {
 						<th>Time Limit</th>
 						<th>Exam Date</th>
 						<th>Time</th>
+						<th>BatchId</th>
 						<th>Created By</th>
 						<th>Actions</th>
 						<th>Generate PDF</th>
@@ -272,6 +273,7 @@ const ExamList = () => {
 									new Date(exam.date).toLocaleDateString()
 								)}
 							</td>
+				
 							<td>
 								{editingExam?._id === exam._id ? (
 									<input 
@@ -287,6 +289,9 @@ const ExamList = () => {
 								) : (
 									exam.startTime
 								)}
+							</td>
+							<td>
+								{exam.batch}
 							</td>
 							<td>
 								{exam.createdBy?.firstName} {exam.createdBy?.lastName}

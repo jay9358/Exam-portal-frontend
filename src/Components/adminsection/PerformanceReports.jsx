@@ -485,14 +485,13 @@ const PerformanceReports = () => {
     
     const searchTerm = searchValue.toLowerCase().trim();
 
-    // Create a map of results by student ID with status
+    // Create a map of results by student ID
     const resultsByStudentId = reportData.results.reduce((acc, result) => {
-      const status = result.score >= 40 ? "Pass" : "Fail";
-      acc[result.student] = { ...result, status };
+      acc[result.student] = result;  // Use the entire result object
       return acc;
     }, {});
 
-    // Search and map students with their results and status
+    // Search and map students with their results
     const matchingStudents = reportData.users
       .filter((student) =>
         (student.rollNo || '').toLowerCase().includes(searchTerm) ||
@@ -506,11 +505,11 @@ const PerformanceReports = () => {
         const examResult = resultsByStudentId[user._id];
         return {
           ...user,
-          examResult: examResult || null,
-          status: examResult ? examResult.status : "Not Attempted"
+          examResult: examResult || null
         };
       });
 
+    console.log("Matching students with results:", matchingStudents);
     setFilteredStudents(matchingStudents);
   };
 
@@ -539,29 +538,23 @@ const PerformanceReports = () => {
       
       console.log("API Response:", response.data.data);
 
-      // Create a map of results by student ID with status
-      const resultsByStudentId = response.data.data.results.reduce((acc, result) => {
-        // Determine status based on score
-        const status = result.score >= 40 ? "Pass" : "Fail";
-        acc[result.student] = { ...result, status };
-        return acc;
-      }, {});
-
-      // Map all users with their results and status
-      const initialFilteredStudents = response.data.data.users.map(user => {
-        const examResult = resultsByStudentId[user._id];
-        return {
-          ...user,
-          examResult: examResult || null,
-          status: examResult ? examResult.status : "Not Attempted"
-        };
+      // Create a map of results by student ID
+      const resultsByStudentId = {};
+      response.data.data.results.forEach(result => {
+        resultsByStudentId[result.student] = result;
       });
+
+      // Map users with their exam results
+      const initialFilteredStudents = response.data.data.users.map(user => ({
+        ...user,
+        examResult: resultsByStudentId[user._id] || null
+      }));
 
       setReportData(response.data.data);
       setUser(response.data.data.users);
       setResult(response.data.data.results);
       setFilteredStudents(initialFilteredStudents);
-      console.log(initialFilteredStudents)
+      console.log("Filtered Students:", initialFilteredStudents);
       setShowReport(true);
     } catch (error) {
       console.error("Error generating report:", error);
@@ -869,37 +862,38 @@ const PerformanceReports = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {currentStudents.map((student, index) => {
-                            console.log("Rendering student:", student);
-                            return (
-                              <tr key={student._id || index}>
-                                <td>{student.rollNo}</td>
-                                <td>{`${student.firstName} ${student.lastName}`}</td>
-                                <td>{student.examResult ? student.examResult.score : 'Not Attempted'}</td>
-                                <td style={{
-                                  color: student.examResult.status === "Pass" ? "#4CAF50" : 
-                                         student.status === "Fail" ? "#f44336" : "#757575",
-                                  fontWeight: "bold",
-                                  backgroundColor: student.status === "Pass" ? "rgba(76, 175, 80, 0.1)" : 
-                                                  student.status === "Fail" ? "rgba(244, 67, 54, 0.1)" : "rgba(117, 117, 117, 0.1)",
-                                  padding: "4px 8px",
-                                  borderRadius: "4px",
-                                  textAlign: "center"
-                                }}>
-                                  {student.examResult.status}
-                                </td>
-                                <td>
-                                  <button 
-                                    className="generate-certificate-btn"
-                                    disabled={student.status !== "Pass" || generatingCertificate}
-                                    onClick={generateCertificate(student)}
-                                  >
-                                    {generatingCertificate ? "Generating..." : "Generate Certificate"}
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })}
+                          {currentStudents
+                            .filter(student => student.examResult !== null)
+                            .map((student, index) => {
+                              console.log("Rendering student with exam result:", student.examResult);
+                              return (
+                                <tr key={student._id || index}>
+                                  <td>{student.rollNo}</td>
+                                  <td>{`${student.firstName} ${student.lastName}`}</td>
+                                  <td>{student.examResult.score}</td>
+                                  <td style={{
+                                    color: student.examResult.status === "Pass" ? "#4CAF50" : "#f44336",
+                                    fontWeight: "bold",
+                                    backgroundColor: student.examResult.status === "Pass" ? 
+                                      "rgba(76, 175, 80, 0.1)" : "rgba(244, 67, 54, 0.1)",
+                                    padding: "4px 8px",
+                                    borderRadius: "4px",
+                                    textAlign: "center"
+                                  }}>
+                                    {student.examResult.status}
+                                  </td>
+                                  <td>
+                                    <button 
+                                      className="generate-certificate-btn"
+                                      disabled={student.examResult.status !== "Pass" || generatingCertificate}
+                                      onClick={generateCertificate(student)}
+                                    >
+                                      {generatingCertificate ? "Generating..." : "Generate Certificate"}
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
                         </tbody>
                       </table>
 
