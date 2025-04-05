@@ -197,7 +197,7 @@ const UploadCSVSchool = () => {
 
       {currentSchools.length > 0 && (
         <div className="user-table">
-          <h2 className="title"> Registered Schools</h2>
+        
 
           {/* Filter Section */}
           <div className="filter-container">

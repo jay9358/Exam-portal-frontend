@@ -6,27 +6,32 @@ function GeneratePassword() {
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Fetch existing password when component mounts
-  useEffect(() => {
-    const fetchExistingPassword = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/v1/admin/getPassword`, {
-          headers: { Authorization: localStorage.getItem("token") }
-        });
-        if (response.data.success) {
-            console.log(response.data)
-          setGeneratedPassword(response.data.defaultPassword);
-        }
-      } catch (error) {
-        toast.error('Failed to fetch existing password');
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchExistingPassword();
+  // Fetch batches and existing password when component mounts
+  useEffect(() => {
+  
+      fetchExistingPassword();
+    
   }, []);
+
+
+
+  const fetchExistingPassword = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/v1/admin/getPassword`, {
+       
+        headers: { Authorization: localStorage.getItem("token") }
+      });
+      if (response.data.success) {
+        setGeneratedPassword(response.data.defaultPassword);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch existing password');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Generate random password
   const generateRandomPassword = () => {
@@ -39,14 +44,19 @@ function GeneratePassword() {
   };
 
   const handleGeneratePassword = async () => {
+
+
     try {
       setLoading(true);
       const newPassword = generateRandomPassword();
       
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/v1/admin/updatePassword`, {
-        newPassword: newPassword,
-        userId:localStorage.getItem("userId")
-      },	{ headers: { Authorization: localStorage.getItem("token") } });
+        newPassword,
+      
+      
+      }, { 
+        headers: { Authorization: localStorage.getItem("token") } 
+      });
 
       if (response.data.success) {
         setGeneratedPassword(newPassword);
@@ -55,6 +65,7 @@ function GeneratePassword() {
         toast.error('Failed to update password');
       }
     } catch (error) {
+      console.error('Error updating password:', error);
       toast.error('Failed to update password');
     } finally {
       setLoading(false);
@@ -92,16 +103,8 @@ function GeneratePassword() {
         </div>
       )}
       
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: '#363636',
-            color: '#fff',
-          },
-        }}
-      />
+
+      
     </div>
   );
 }

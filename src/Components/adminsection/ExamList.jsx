@@ -76,6 +76,7 @@ const ExamList = () => {
 		try {
 			// Show loading toast
 			const loadingToast = toast.loading("Generating PDF report...");
+			console.log(exam);
 			
 			// Fetch all results
 			const resultsResponse = await axios.get(
@@ -149,7 +150,7 @@ const ExamList = () => {
 					try {
 						// Try to fetch student details
 						const studentResponse = await axios.get(
-							`${import.meta.env.VITE_API_URL}/v1/admin/users/${result.student}`,
+							`${import.meta.env.VITE_API_URL}/v1/admin/user/${result.student}`,
 							{
 								headers: {
 									Authorization: token,
@@ -159,13 +160,14 @@ const ExamList = () => {
 						
 						const student = studentResponse.data.user;
 						const studentName = student ? `${student.firstName} ${student.lastName}` : "Unknown Student";
-						const totalQuestions = result.questionsAnswered ? result.questionsAnswered.length : 0;
-						const percentage = totalQuestions > 0 ? Math.round((result.score / totalQuestions) * 100) : 0;
+						const attemptedQuestions = result.questionsAnswered ? result.questionsAnswered.length : 0;
+						const percentage = exam.totalQuestions > 0 ? Math.round((result.score / exam.totalQuestions) * 100) : 0;
 						
 						return [
 							studentName,
 							result.score,
-							totalQuestions,
+							attemptedQuestions,
+							exam.totalQuestions,
 							`${percentage}%`,
 							result.status,
 							new Date(result.createdAt).toLocaleString()
@@ -176,7 +178,9 @@ const ExamList = () => {
 							`Student ID: ${result.student}`,
 							result.score,
 							result.questionsAnswered ? result.questionsAnswered.length : 'N/A',
-							'N/A',
+							exam.totalQuestions,
+							exam.totalQuestions > 0 ? Math.round((result.score / exam.totalQuestions) * 100) : 0,
+							
 							result.status,
 							new Date(result.createdAt).toLocaleString()
 						];
@@ -188,7 +192,7 @@ const ExamList = () => {
 				
 				doc.autoTable({
 					startY: startY,
-					head: [["Student Name", "Score", "Total Questions", "Percentage", "Status", "Submitted At"]],
+					head: [["Student Name", "Score", "Attempted Questions","Total Question", "Percentage", "Status", "Submitted At"]],
 					body: resultData,
 					theme: 'grid',
 					headStyles: { fillColor: [41, 128, 185], textColor: 255 },

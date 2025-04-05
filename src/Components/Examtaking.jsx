@@ -1,8 +1,11 @@
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../assets/css/Examtaking.css";
 import toast from "react-hot-toast";
+
+const LS_PREFIX = 'exam_'; // prefix for localStorage keys
+const getStorageKey = (examId) => `${LS_PREFIX}${examId}`;
 
 const Examtaking = () => {
 	const { examId } = useParams();
@@ -19,17 +22,52 @@ const Examtaking = () => {
 
 	const fetchQuestions = async () => {
 		try {
+			// First check if there's a saved state
+			const savedState = loadExamState();
+			
+			// Get server time regardless of saved state
 			const Timeresponse = await axios.get(
 				`${import.meta.env.VITE_API_URL}/v1/time`,
 				{
-				  headers: {
-					Authorization: localStorage.getItem("token"),
-				  },
+					headers: {
+						Authorization: localStorage.getItem("token"),
+					},
 				}
-			  );
-			  const serverTime = Timeresponse.data.data.readableTime;
-			  console.log("Server time:", serverTime);
-			  
+			);
+			const serverTime = Timeresponse.data.data.readableTime;
+
+			if (savedState) {
+				// If we have saved state, just recalculate timer
+				const response = await axios.get(
+					`${import.meta.env.VITE_API_URL}/v1/exams/${examId}/start`,
+					{
+						headers: {
+							Authorization: localStorage.getItem("token"),
+						},
+					}
+				);
+				
+				// Calculate remaining time as before
+				const [time, period] = serverTime.split(' ');
+				let [serverHours, serverMinutes, serverSeconds] = time.split(':').map(Number);
+				
+				if (period === 'PM' && serverHours !== 12) {
+					serverHours += 12;
+				} else if (period === 'AM' && serverHours === 12) {
+					serverHours = 0;
+				}
+
+				const [startHours, startMinutes] = response.data.examDetails.startTime.split(':').map(Number);
+				const elapsedMinutes = (serverHours - startHours) * 60 + (serverMinutes - startMinutes);
+				const timeLimit = response.data.examDetails.timeLimit;
+				const remainingMinutes = Math.max(0, timeLimit - elapsedMinutes);
+				const remainingSeconds = Math.max(0, (60 - serverSeconds));
+				
+				startTimer(remainingMinutes, remainingSeconds);
+				return; // Exit early as we already have the questions
+			}
+
+			// If no saved state, proceed with normal fetch
 			const response = await axios.get(
 				`${import.meta.env.VITE_API_URL}/v1/exams/${examId}/start`,
 				{
@@ -38,48 +76,35 @@ const Examtaking = () => {
 					},
 				}
 			);
-			if(!response){
+
+			if (!response) {
 				toast.error(response.data.message);
-				
+				return;
 			}
+
 			const receivedQuestions = response.data.questions;
-			console.log("Received questions:", receivedQuestions);
 			setQuestions(receivedQuestions);
-			
-			// Initialize attempted questions array with the correct length
 			setAttemptedQuestions(new Array(receivedQuestions.length).fill(false));
 
+			// Calculate timer as before
 			const [time, period] = serverTime.split(' ');
 			let [serverHours, serverMinutes, serverSeconds] = time.split(':').map(Number);
 			
-			// Adjust hours for PM
 			if (period === 'PM' && serverHours !== 12) {
 				serverHours += 12;
-			}
-			// Adjust hours for AM
-			else if (period === 'AM' && serverHours === 12) {
+			} else if (period === 'AM' && serverHours === 12) {
 				serverHours = 0;
 			}
-			console.log("Server time:", serverHours, serverMinutes, serverSeconds);
-	
+
 			const [startHours, startMinutes] = response.data.examDetails.startTime.split(':').map(Number);
-			console.log("Start time:", startHours, startMinutes);
-			// Calculate elapsed time in minutes
 			const elapsedMinutes = (serverHours - startHours) * 60 + (serverMinutes - startMinutes);
-			console.log("Elapsed time:", elapsedMinutes);
-			// Calculate remaining time based on time limit
 			const timeLimit = response.data.examDetails.timeLimit;
 			const remainingMinutes = Math.max(0, timeLimit - elapsedMinutes);
 			const remainingSeconds = Math.max(0, (60 - serverSeconds));
-			console.log("Remaining time:", remainingMinutes, remainingSeconds);
-			
-			
 			
 			startTimer(remainingMinutes, remainingSeconds);
-			
 
 		} catch (error) {
-			navigate(`/submitexam/${examId}/result`);
 			
 			console.log("Not able to start the exam", error);
 		}
@@ -119,6 +144,8 @@ const Examtaking = () => {
 			setTimer(`${minutes}:${seconds.toString().padStart(2, "0")}`);
 			if (remainingTime <= 0) {
 				clearInterval(interval);
+				// Load saved state before auto-submitting
+				loadExamState();
 				handleSubmitExam();
 			}
 		}, 1000);
@@ -133,11 +160,17 @@ const Examtaking = () => {
 	};
 
 	const handleOptionClick = (optionId, questionId) => {
+		console.log("Option Clicked:", optionId, "for Question ID:", questionId); // Debugging line
+
 		// Update answers
-		setAnswers(prevAnswers => ({
-			...prevAnswers,
-			[questionId]: optionId,
-		}));
+		setAnswers(prevAnswers => {
+			const newAnswers = {
+				...prevAnswers,
+				[questionId]: optionId,
+			};
+			console.log("Updated Answers:", newAnswers); // Debugging line
+			return newAnswers;
+		});
 
 		// Update attempted questions array
 		setAttemptedQuestions(prevAttempted => {
@@ -191,15 +224,20 @@ const Examtaking = () => {
 	};
 
 	const handleSubmitExam = async () => {
-		clearTimer(); // Clear the timer when submitting
+		clearTimer();
+		console.log("RADCHED");
 		try {
-			// Create submission data with only answered questions
-			const answeredQuestions = questions.filter((q) => answers[q._id]);
+			// Load saved state before submission
+			const savedState = loadExamState();
+			console.log("Saved State:", savedState); // Debugging line
+
 			const submissionData = {
-				questions: answeredQuestions,
-				answers: answers,
+				questions: savedState ? savedState.questions : questions, // Use saved questions if available
+				answers: savedState ? savedState.answers : answers, // Use saved answers if available
 				attemptedCount: attemptedQuestions.filter(Boolean).length
 			};
+
+			console.log("Submission Data:", submissionData); // Debugging line
 
 			await axios.post(
 				`${import.meta.env.VITE_API_URL}/v1/exams/${examId}/submit`,
@@ -210,13 +248,14 @@ const Examtaking = () => {
 					},
 				}
 			);
+			
+			// Clear saved state after successful submission
+			localStorage.removeItem(getStorageKey(examId));
+			
 			navigate(`/submitexam/${examId}/result`);
 			toast.success("Exam submitted successfully!");
 		} catch (error) {
-			console.error(
-				"Error submitting exam:",
-				error.response?.data?.message || error.message
-			);
+			console.error("Error submitting exam:", error.response?.data?.message || error.message);
 			toast.error("Failed to submit the exam.");
 		}
 	};
@@ -240,7 +279,44 @@ const Examtaking = () => {
 		return { notVisited, notAnswered, answered };
 	};
 
-	const { notVisited, notAnswered, answered } = calculateStatusCounts();
+	// Add new function to save exam state to localStorage
+	const saveExamState = () => {
+		const examState = {
+			questions,
+			answers,
+			markedArr,
+			currentQuestion,
+			markedForReview,
+			attemptedQuestions,
+			timer,
+			lastUpdated: new Date().getTime(),
+		};
+		localStorage.setItem(getStorageKey(examId), JSON.stringify(examState));
+	};
+
+	// Add new function to load exam state from localStorage
+	const loadExamState = () => {
+		const savedState = localStorage.getItem(getStorageKey(examId));
+		if (savedState) {
+			const parsedState = JSON.parse(savedState);
+			setQuestions(parsedState.questions);
+			setAnswers(parsedState.answers);
+			setMarkedArr(parsedState.markedArr);
+			setCurrentQuestion(parsedState.currentQuestion);
+			setMarkedForReview(parsedState.markedForReview);
+			setAttemptedQuestions(parsedState.attemptedQuestions);
+			// Don't restore timer directly, recalculate it
+			return parsedState;
+		}
+		return null;
+	};
+
+	// Add effect to save state when relevant data changes
+	useEffect(() => {
+		if (questions.length > 0) {
+			saveExamState();
+		}
+	}, [questions, answers, markedArr, currentQuestion, markedForReview, attemptedQuestions, timer]);
 
 	return (
 		<div className="exam-container">
@@ -277,6 +353,18 @@ const Examtaking = () => {
 				<h4>Navigation</h4>
 				<div className="timer-display">
 					Timer: {timer || "--:--"}
+				</div>
+				<div className="status-summary">
+					{(() => {
+						const { notVisited, notAnswered, answered } = calculateStatusCounts();
+						return (
+							<>
+								<div>Answered: {answered}</div>
+								<div>Not Answered: {notAnswered}</div>
+								<div>Not Visited: {notVisited}</div>
+							</>
+						);
+					})()}
 				</div>
 				<div className="question-grid">
 					{questions.map((q, index) => (

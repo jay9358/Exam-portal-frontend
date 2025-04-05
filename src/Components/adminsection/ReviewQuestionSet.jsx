@@ -180,8 +180,12 @@ export default function ReviewQuestionSet() {
           doc.text(`${optionLabel}) ${option.text}`, 32, yPos);
           yPos += 7; // Reduced spacing between options
         });
+        
+        const correctOption = q.options.find(option => option.isCorrect);
 
-        yPos += 5; // Reduced spacing between questions
+        doc.text(`Correct Answer: ${correctOption ? correctOption.text : 'None'}`, 32, yPos + 3); // Added spacing for better readability
+
+        yPos += 12; // Increased spacing between questions for clarity
       });
 
       // Add page numbers with styling - smaller footer

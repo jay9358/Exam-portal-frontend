@@ -14,6 +14,20 @@ const UploadCSV = () => {
   const [usersPerPage, setUsersPerPage] = useState(10); // State for users per page
   const [currentPage, setCurrentPage] = useState(1); // State for current page
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  
+  // State for update modal
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [currentStudent, setCurrentStudent] = useState(null);
+  const [updatedData, setUpdatedData] = useState({
+    rollNo: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    mobileNumber: '',
+    batch: '',
+    level: '',
+    schoolId: '',
+  });
 
   const fetchStudents = async () => {
     try {
@@ -170,7 +184,7 @@ const UploadCSV = () => {
   // Calculate total pages
   const totalPages = Math.ceil(students.length / usersPerPage);
 
-  // Handle delete all users
+  // Rename this function
   const handleDeleteAllUsers = async () => {
     try {
       const response = await axios.delete(
@@ -206,56 +220,106 @@ const UploadCSV = () => {
       )
     : currentUsers;
 
+  // Add this new function near other handler functions
+  const handleDeleteSingleUser = async (userId) => {
+    try {
+      const response = await axios.delete(
+        `${import.meta.env.VITE_API_URL}/v1/admin/users/delete/${userId}`,
+        {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("User deleted successfully");
+        fetchStudents(); // Refresh the student list
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Failed to delete user");
+    }
+  };
+
+  const handleUpdateSingleUser = async (userId) => {
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_URL}/v1/admin/users/${userId}/update`,
+        updatedData,
+        {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("User updated successfully");
+        fetchStudents(); // Refresh the student list
+        setShowUpdateModal(false); // Close the modal
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+      toast.error("Failed to update user");
+    }
+  };
+
+  const openUpdateModal = (student) => {
+    setCurrentStudent(student);
+    setUpdatedData({
+      rollNo: student.rollNo || '',
+      firstName: student.firstName || '',
+      lastName: student.lastName || '',
+      email: student.email || '',
+      mobileNumber: student.mobileNumber || '',
+      batch: student.batch || '',
+      level: student.level || '',
+      schoolId: student.schoolId || '',
+    });
+    setShowUpdateModal(true);
+  };
+
   return (
     <div className="upload-csv">
       <h1>Register Users</h1>
-
-      {/* Upload and Download Section */}
-      <div className="upload-section">
-        <button onClick={handleFileClick} className="custom-upload-btn">
-          <PlusCircleIcon className="icon" /> Upload CSV
-        </button>
-
-        {/* Download CSV Template Button */}
-        <button onClick={downloadCSVTemplate} className="download-template-btn">
-          <DownloadIcon className="icon" /> Download CSV Template
-        </button>
-
-        {/* Hidden file input */}
-        <input
-          type="file"
-          id="file-input"
-          accept=".csv"
-          onChange={handleFileUpload}
-          className="upload-input"
-        />
-
-        {csvFile && (
-          <div className="file-info">
-            <span>{csvFile.name}</span>
-            <button onClick={deleteFile} className="delete-button">
-              <TrashIcon className="icon" />
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Users per page selection */}
-
-      {/* Delete All Users Button */}
-      <div className="delete-all-section">
-        <button
-          onClick={() => setShowConfirmDialog(true)}
-          className="delete-all-btn"
-        >
+      
+      <div className="actions-bar">
+        <div className="upload-section">
+          <button onClick={handleFileClick} className="custom-upload-btn">
+            <PlusCircleIcon className="icon" /> Upload CSV
+          </button>
+          <button onClick={downloadCSVTemplate} className="download-template-btn">
+            <DownloadIcon className="icon" /> Download Template
+          </button>
+          <input
+            type="file"
+            id="file-input"
+            accept=".csv"
+            onChange={handleFileUpload}
+            style={{ display: 'none' }}  // Hide using inline style
+          />
+          {csvFile && (
+            <div className="file-info">
+              <span>{csvFile.name}</span>
+              <button onClick={deleteFile} className="delete-button">
+                <TrashIcon className="icon" />
+              </button>
+            </div>
+          )}
+        </div>
+        
+        <button onClick={() => setShowConfirmDialog(true)} className="delete-all-btn">
           <TrashIcon className="icon" /> Delete All Users
         </button>
       </div>
+      
+      {/* Users per page selection */}
 
       {/* Students Section */}
       {currentUsers.length > 0 && (
         <div className="user-table">
-          <h2 className="title"> Registered Students</h2>
+      
 
           {/* Student Filter */}
           <div className="filter-container">
@@ -294,6 +358,7 @@ const UploadCSV = () => {
                 <th>School</th>
                 <th>Level</th>
                 <th>BatchID</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -308,6 +373,20 @@ const UploadCSV = () => {
                   <td>{student.schoolId || "N/A"}</td>
                   <td>{student.level || "N/A"}</td>
                   <td>{student.batch || "N/A"}</td>
+                  <td>
+                    <button
+                      onClick={() => handleDeleteSingleUser(student._id)}
+                      className="delete-user-btn"
+                    >
+                      <TrashIcon className="icon" />
+                    </button>
+                    <button
+                      onClick={() => openUpdateModal(student)}
+                      className="update-user-btn"
+                    >
+                      Update
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -363,6 +442,65 @@ const UploadCSV = () => {
                 Confirm Delete
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Update Modal */}
+      {showUpdateModal && (
+        <div className="update-modal">
+          <div className="modal-content">
+            <h3>Update User</h3>
+            <input
+              type="text"
+              placeholder="Roll No"
+              value={updatedData.rollNo}
+              onChange={(e) => setUpdatedData({ ...updatedData, rollNo: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="First Name"
+              value={updatedData.firstName}
+              onChange={(e) => setUpdatedData({ ...updatedData, firstName: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="Last Name"
+              value={updatedData.lastName}
+              onChange={(e) => setUpdatedData({ ...updatedData, lastName: e.target.value })}
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={updatedData.email}
+              onChange={(e) => setUpdatedData({ ...updatedData, email: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="Mobile Number"
+              value={updatedData.mobileNumber}
+              onChange={(e) => setUpdatedData({ ...updatedData, mobileNumber: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="Batch ID"
+              value={updatedData.batch}
+              onChange={(e) => setUpdatedData({ ...updatedData, batch: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="Level"
+              value={updatedData.level}
+              onChange={(e) => setUpdatedData({ ...updatedData, level: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="School ID"
+              value={updatedData.schoolId}
+              onChange={(e) => setUpdatedData({ ...updatedData, schoolId: e.target.value })}
+            />
+            <button className="save-btn" onClick={() => handleUpdateSingleUser(currentStudent._id)}>Save</button>
+            <button className="cancel-btn" onClick={() => setShowUpdateModal(false)}>Cancel</button>
           </div>
         </div>
       )}

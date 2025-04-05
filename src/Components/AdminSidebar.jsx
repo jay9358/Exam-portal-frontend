@@ -63,6 +63,13 @@ export default function AdminSidebar() {
               <span>Review Exam Sets</span>
             </Link>
           </NavItem>
+          <NavItem>
+            <ListIcon className="icon" />
+            <Link to="/reviewbank">
+              <span>Review Question Bank</span>
+            </Link>
+          </NavItem>
+          
 
 
           {/* Reports */}
