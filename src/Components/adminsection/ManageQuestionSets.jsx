@@ -8,6 +8,7 @@ const ManageQuestionSets = () => {
 	const [selectedSetId, setSelectedSetId] = useState(null);
 	const [newQuestionSetName, setNewQuestionSetName] = useState("");
 	const [csvFile, setCsvFile] = useState(null);
+	const [selectedLevel, setSelectedLevel] = useState("");
 
 	// States for new exam set CSV upload
 	const [newCsvSetName, setNewCsvSetName] = useState("");
@@ -35,13 +36,16 @@ const ManageQuestionSets = () => {
 
 	const handleCreateQuestionSet = async () => {
 		try {
+
+
 			const response = await axios.post(
 				`${import.meta.env.VITE_API_URL}/v1/admin/questionSets`,
-				{ setName: newQuestionSetName },
+				{ setName: prefixedSetName },
 				{ headers: { Authorization: localStorage.getItem("token") } }
 			);
 			setQuestionSets([...questionSets, response.data.questionSet]);
 			setNewQuestionSetName("");
+			setSelectedLevel("");
 			toast.success("Question set created successfully!");
 		} catch (error) {
 			toast.error(`Error creating question set: ${error.message}`);
@@ -108,10 +112,28 @@ const ManageQuestionSets = () => {
 
 	// Upload CSV for a New Exam Set (addon) using the current API for each question.
 	const handleCsvExamSetUpload = async () => {
-		if (!newCsvSetName || !csvExamSetFile) {
-			toast.error("Please enter a new exam set name and select a CSV file.");
+		if (!newCsvSetName || !csvExamSetFile || !selectedLevel) {
+			toast.error("Please enter a new exam set name or level and select a CSV file.");
 			return;
 		}
+		let prefix = "";
+		switch (selectedLevel) {
+			case "1":
+				prefix = "P";
+				break;
+			case "2":
+				prefix = "M";
+				break;
+			case "3":
+				prefix = "U";
+				break;
+			case "4":
+				prefix = "T";
+				break;
+			default:
+				break;
+		}
+		const prefixedSetName = prefix +" "+ newCsvSetName;
 
 		setIsLoading(true);
 
@@ -137,7 +159,7 @@ const ManageQuestionSets = () => {
 			try {
 				const createResponse = await axios.post(
 					`${import.meta.env.VITE_API_URL}/v1/admin/questionSets`,
-					{ setName: newCsvSetName, type: type },
+					{ setName: prefixedSetName, type: type },
 					{ headers: { Authorization: localStorage.getItem("token") } }
 				);
 				const newSetId = createResponse.data.questionSet._id;
@@ -196,7 +218,7 @@ const ManageQuestionSets = () => {
 				Manage Question Sets
 			</h2>
 
-			
+
 
 			<button
 				onClick={downloadSampleCSV}
@@ -213,7 +235,16 @@ const ManageQuestionSets = () => {
 					placeholder="Enter new exam set name"
 					className="input-field"
 				/>
-
+				<select
+				value={selectedLevel}
+				onChange={(e) => setSelectedLevel(e.target.value)}
+				className="select-field">
+					<option value="">Select Level</option>
+					<option value="1">Parmbh</option>
+					<option value="2">Madhyam</option>
+					<option value="3">Uttam</option>
+					<option value="4">Trainer</option>
+				</select>
 				<input
 					type="file"
 					accept=".csv"

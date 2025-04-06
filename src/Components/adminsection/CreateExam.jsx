@@ -296,7 +296,7 @@ const CreateExam = () => {
 									className="question-set-checkbox"
 								/>
 								<span className="question-set-name">
-									Set {set.setName}
+									 {set.setName} Bank
 								</span>
 							</label>
 							{questionSets.includes(set._id) && (

@@ -282,7 +282,6 @@ const Examtaking = () => {
 	// Add new function to save exam state to localStorage
 	const saveExamState = () => {
 		const examState = {
-			questions,
 			answers,
 			markedArr,
 			currentQuestion,

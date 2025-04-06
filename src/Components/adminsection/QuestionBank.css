@@ -1,0 +1,39 @@
+/* QuestionBank.css */
+
+.question-bank-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.question-bank-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+.question-bank-table th, .question-bank-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.question-bank-table th {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.question-bank-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.question-bank-table td {
+    color: #555;
+}
