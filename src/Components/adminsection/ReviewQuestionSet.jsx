@@ -87,6 +87,30 @@ export default function ReviewQuestionSet() {
 
   };
 
+  const handleReject = async (id) => {
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/v1/admin/exams/${id}/reject`,
+        { userId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(`Rejected exam set with id: ${id}`);
+      
+      fetchExams(); // Refresh the list after rejection
+    } catch (error) {
+      console.error(
+        "Error rejecting exam set:",
+        error.response?.data || error.message
+      );
+    }
+  };
+
   const generatePDF = async (set) => {
     console.log(set);
     const token = localStorage.getItem("token");
@@ -284,15 +308,29 @@ export default function ReviewQuestionSet() {
                       <span style={{ color: "green", fontWeight: "bold" }}>
                         Approved
                       </span>
+                    ) : exam.ApprovalStatus === "Rejected" ? (
+                      <span style={{ color: "red", fontWeight: "bold" }}>
+                        Rejected
+                      </span>
                     ) : (
-                      exam.createdBy._id !== localStorage.getItem("userId") && (
-                        <button
-                          className="approve-btn btn-danger"
-                          onClick={() => approveExamSet(exam._id)}
-                        >
-                          Approve
-                        </button>
-                      )
+                      <>
+                        {exam.createdBy._id !== localStorage.getItem("userId") && (
+                          <>
+                            <button
+                              className="approve-btn btn-danger"
+                              onClick={() => approveExamSet(exam._id)}
+                            >
+                              Approve
+                            </button>
+                            <button
+                              className="reject-btn btn-danger"
+                              onClick={() => handleReject(exam._id)}
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+                      </>
                     )}
                   </td>
 
