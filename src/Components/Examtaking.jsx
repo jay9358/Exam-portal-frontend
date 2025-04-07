@@ -160,8 +160,6 @@ const Examtaking = () => {
 	};
 
 	const handleOptionClick = (optionId, questionId) => {
-		console.log("Option Clicked:", optionId, "for Question ID:", questionId); // Debugging line
-
 		// Update answers
 		setAnswers(prevAnswers => {
 			const newAnswers = {
@@ -282,6 +280,7 @@ const Examtaking = () => {
 	// Add new function to save exam state to localStorage
 	const saveExamState = () => {
 		const examState = {
+			questions,
 			answers,
 			markedArr,
 			currentQuestion,

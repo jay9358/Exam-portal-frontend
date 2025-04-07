@@ -76,6 +76,7 @@ export default function StudentSection() {
 
         const response = await dispatch(GetallExam());
         const exams = response?.payload?.data?.exams || [];
+        console.log(response);
         // Fetch user details
         const userId = localStorage.getItem('userId');
         const userResponse = await axios.get(
@@ -89,6 +90,7 @@ export default function StudentSection() {
         const user = userResponse.data.user;
         setUser(user);
         console.log(user)
+
         // Filter exams based on user's batch
         const filteredExams = exams.filter(exam => {
             // Check if the exam's batch matches the user's batch and is approved
