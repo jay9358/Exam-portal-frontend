@@ -54,22 +54,7 @@ const ExamList = () => {
 		);
 	};
 
-	// Delete Exam
-	const handleDeleteExam = async (examId) => {
-		try {
-			await axios.delete(`${import.meta.env.VITE_API_URL}/v1/admin/exams/${examId}`, {
-				headers: {
-					Authorization: `Bearer ${localStorage.getItem("token")}`,
-				},
-			});
-			console.log("Exam deleted successfully");
-			setExams((prevExams) => prevExams.filter((exam) => exam._id !== examId));
-			toast.success("Exam deleted successfully!");
-			// alert("Exam deleted successfully");
-		} catch (error) {
-			console.error("Error deleting exam:", error.response?.data || error.message);
-		}
-	};
+
 
 	// Generate PDF
 	const generatePDF = async (exam) => {
@@ -95,7 +80,15 @@ const ExamList = () => {
 
 			console.log(examResults);
 			// Calculate statistics
-			const registeredStudents = examResults?.length || 0;
+			const batchId = exam.batch; // Assuming exam has a batchId property
+			const studentsResponse = await axios.get(`${import.meta.env.VITE_API_URL}/v1/admin/users/batch/${batchId}`, {
+				headers: {
+					Authorization: `Bearer ${localStorage.getItem("token")}`,
+				},
+			});
+			
+			const registeredStudents = studentsResponse.data.users.length || 0;
+			
 			const attemptedStudents = examResults.length;
 			const passedStudents = examResults.filter(result => result.status === "Pass").length;
 			const failedStudents = attemptedStudents - passedStudents;
@@ -164,6 +157,7 @@ const ExamList = () => {
 						const percentage = exam.totalQuestions > 0 ? Math.round((result.score / exam.totalQuestions) * 100) : 0;
 						
 						return [
+							student.rollNo,
 							studentName,
 							result.score,
 							attemptedQuestions,
@@ -192,7 +186,7 @@ const ExamList = () => {
 				
 				doc.autoTable({
 					startY: startY,
-					head: [["Student Name", "Score", "Attempted Questions","Total Question", "Percentage", "Status", "Submitted At"]],
+					head: [["ROLL NO","Student Name", "Score", "Attempted Questions","Total Question", "Percentage", "Status", "Submitted At"]],
 					body: resultData,
 					theme: 'grid',
 					headStyles: { fillColor: [41, 128, 185], textColor: 255 },
@@ -305,10 +299,7 @@ const ExamList = () => {
 									onClick={() => handleEdit(exam)}
 									className="icon edit-icon"
 								/>
-								<FaTrash
-									onClick={() => handleDeleteExam(exam._id)}
-									className="icon delete-icon"
-								/>
+
 							</td>
 							<td>
 								<button

@@ -34,23 +34,7 @@ const ManageQuestionSets = () => {
 		}
 	};
 
-	const handleCreateQuestionSet = async () => {
-		try {
 
-
-			const response = await axios.post(
-				`${import.meta.env.VITE_API_URL}/v1/admin/questionSets`,
-				{ setName: prefixedSetName },
-				{ headers: { Authorization: localStorage.getItem("token") } }
-			);
-			setQuestionSets([...questionSets, response.data.questionSet]);
-			setNewQuestionSetName("");
-			setSelectedLevel("");
-			toast.success("Question set created successfully!");
-		} catch (error) {
-			toast.error(`Error creating question set: ${error.message}`);
-		}
-	};
 
 	// Helper function to parse CSV text into an array of objects.
 	// Note: This simple parser assumes your CSV is straightforward without quoted commas.
@@ -181,7 +165,8 @@ const ManageQuestionSets = () => {
 				setCsvExamSetFile(null);
 				fetchQuestionSets();
 			} catch (error) {
-				toast.error(`Error uploading exam set CSV: ${error.message}`);
+				console.log(error);
+				toast.error(`${error.response.data.message}`);
 			} finally {
 				setIsLoading(false);
 			}

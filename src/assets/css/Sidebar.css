@@ -11,12 +11,14 @@
     border-top-right-radius: 20px; /* Rounded top-right corner */
     border-bottom-right-radius: 20px; /* Rounded bottom-right corner */
     padding: 20px;
+    overflow-y: auto; /* Enable vertical scrolling */
   }
   
   /* Style for list items to ensure icons and text are inline */
   .sidebar ul {
     list-style: none;
     padding-left: 0;
+    margin: 0; /* Remove default margin */
   }
   
   .sidebar li {

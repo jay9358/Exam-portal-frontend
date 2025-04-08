@@ -141,6 +141,36 @@ const SidebarContainer = styled.div`
   border-bottom-right-radius: 20px;
   padding: 20px;
   z-index: 10;
+  overflow-y: auto;
+  
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  /* Hide scrollbar for Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
+  
+  /* Show scrollbar on hover */
+  &:hover {
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.8);
+    }
+  }
 `;
 
 const Nav = styled.nav`

@@ -7,6 +7,8 @@ const QuestionBank = () => {
 	const [questionSets, setQuestionSets] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [filterLevel, setFilterLevel] = useState('1'); // Default to level 1
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [setToDelete, setSetToDelete] = useState(null);
 
 	const fetchQuestionSets = async () => {
 		try {
@@ -26,17 +28,27 @@ const QuestionBank = () => {
 	};
 
 	const handleDelete = async (id) => {
-		try {
-			await axios.delete(`${import.meta.env.VITE_API_URL}/v1/admin/questionSets/${id}`, {
-				headers: {
-					Authorization: localStorage.getItem("token"),
-				},
-			});
-			toast.success("Question set deleted successfully!");
-			fetchQuestionSets(); // Refresh the list after deletion
-		} catch (error) {
-			toast.error("Failed to delete question set.");
-			console.error("Error deleting question set:", error);
+		setSetToDelete(id);
+		setIsModalOpen(true);
+	};
+
+	const confirmDelete = async () => {
+		if (setToDelete) {
+			try {
+				await axios.delete(`${import.meta.env.VITE_API_URL}/v1/admin/questionSets/${setToDelete}`, {
+					headers: {
+						Authorization: localStorage.getItem("token"),
+					},
+				});
+				toast.success("Question set deleted successfully!");
+				fetchQuestionSets();
+			} catch (error) {
+				toast.error("Failed to delete question set.");
+				console.error("Error deleting question set:", error);
+			} finally {
+				setIsModalOpen(false);
+				setSetToDelete(null);
+			}
 		}
 	};
 
@@ -128,6 +140,16 @@ const QuestionBank = () => {
 					))}
 				</tbody>
 			</table>
+
+			{isModalOpen && (
+				<div className="modal">
+					<div className="modal-content">
+						<h3>Are you sure you want to delete this question set?</h3>
+						<button onClick={confirmDelete}>Yes, Delete</button>
+						<button onClick={() => setIsModalOpen(false)}>Cancel</button>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 };
