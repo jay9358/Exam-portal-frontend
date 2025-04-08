@@ -1,5 +1,5 @@
 import axios from "axios"
-const Base_URL = "http://localhost:4000";
+const Base_URL = "https://exam-porta-backend.vercel.app";
 // "https://exam-porta-backend.vercel.app";
 const axiosInstance=axios.create();
 axiosInstance.defaults.baseURL=Base_URL;
