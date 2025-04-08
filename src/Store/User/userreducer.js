@@ -23,9 +23,10 @@ export const loginaccount = createAsyncThunk("/login", async (data) => {
 			},
 		});
 		const resp = await response;
+		console.log(resp)
 		localStorage.setItem(
 			"level",
-			resp?.payload?.data?.userDetails?.level || 1
+			resp?.data?.userDetails?.level || 1
 		);
 		console.log(resp.data.userDetails._id);
 		localStorage.setItem(
