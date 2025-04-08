@@ -88,6 +88,9 @@ const SubmittedExam = () => {
 					<strong>Exam:</strong> {result.exam}
 				</p>
 				<p>
+					<strong>Status:</strong> {result.status}
+				</p>
+				<p>
 					<strong>Score:</strong> {result.score}
 				</p>
 				<p>

@@ -243,7 +243,9 @@ const UploadCSV = () => {
   };
 
   const handleUpdateSingleUser = async (userId) => {
+    console.log(updatedData)
     try {
+     
       const response = await axios.put(
         `${import.meta.env.VITE_API_URL}/v1/admin/users/${userId}/update`,
         updatedData,

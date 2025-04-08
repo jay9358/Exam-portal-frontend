@@ -87,19 +87,7 @@ const ManageExams = () => {
       setSessions([]);
     }
   }
-  // Delete an exam
-  const handleDeleteExam = async (examId) => {
-    try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/v1/admin/exams/${examId}`, {
-        headers: {
-          Authorization: localStorage.getItem('token'),
-        },
-      });
-      setExams((prevExams) => prevExams.filter((exam) => exam._id !== examId));
-    } catch (error) {
-      console.error('Error deleting exam:', error.response?.data?.message || error.message);
-    }
-  };
+  
 
   // Determine exam status based on current time
   const currentTime = new Date();
@@ -146,9 +134,7 @@ const ManageExams = () => {
                 <div>Registered Students: {registeredStudents}</div>
                 <div>Attempting Students: {attemptingStudents}</div>
                 <div>Completed Students: {completedStudents}</div>
-                <div className="exam-actions">
-                  <button onClick={() => handleDeleteExam(exam._id)}>Delete</button>
-                </div>
+
               </li>
             );
           })
@@ -168,9 +154,7 @@ const ManageExams = () => {
                 <div>Registered Students: {registeredStudents}</div>
                 <div>Attempting Students: {attemptingStudents}</div>
                 <div>Completed Students: {completedStudents}</div>
-                <div className="exam-actions">
-                  <button onClick={() => handleDeleteExam(exam._id)}>Delete</button>
-                </div>
+    
               </li>
             );
           })
@@ -190,9 +174,7 @@ const ManageExams = () => {
                 <div>Registered Students: {registeredStudents}</div>
                 <div>Attempting Students: {attemptingStudents}</div>
                 <div>Completed Students: {completedStudents}</div>
-                <div className="exam-actions">
-                  <button onClick={() => handleDeleteExam(exam._id)}>Delete</button>
-                </div>
+
               </li>
             );
           })

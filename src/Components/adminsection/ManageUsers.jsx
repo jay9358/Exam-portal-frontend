@@ -17,6 +17,7 @@ const ManageUsers = () => {
     State: "",  
     City: "",
     level: "",
+    rollNo: "",
   });
   const [users, setUsers] = useState([]);
   const [schools, setSchools] = useState([]);
@@ -170,11 +171,11 @@ const ManageUsers = () => {
 
   // Handle adding a new user
   const handleAddUser = async () => {
-    const { firstName, lastName, accountType, school, email, mobileNumber, City, State, level, batch } = formData;
+    const { firstName, lastName, accountType, school, email, mobileNumber, City, State, level, batch,rollNo } = formData;
 
     // Check if all required fields are filled
-    if (!firstName || !lastName || !accountType || !email || !mobileNumber) {
-      toast.error("Please fill in all required fields: First Name, Last Name, Email, Mobile Number and Role");
+    if (!firstName || !lastName || !accountType || !email || !mobileNumber ||!rollNo) {
+      toast.error("Please fill in all required fields: First Name, Last Name, Email, Mobile Number,rollNo and Role");
       return;
     }
 
@@ -211,6 +212,7 @@ const ManageUsers = () => {
                 firstName,
                 lastName,
                 email,
+                rollNo,
                 mobileNumber,
                 accountType,
                 State,
@@ -250,6 +252,7 @@ const ManageUsers = () => {
                 leading: [],
                 level: "",
                 batch: "",
+                rollNo: "",
             });
             setSchoolOptions([]);
             toast.success("Users added successfully!");
@@ -454,6 +457,17 @@ const ManageUsers = () => {
 
         {formData.accountType === "Student" && (
           <>
+            <div className="input-group">
+              <input
+                type="text"
+                name="rollNo"
+                value={formData.rollNo}
+                onChange={handleInputChange}
+                placeholder="Roll Number"
+                className="input-field"
+                required
+              />
+            </div>
             <div className="input-group">
               <select
                 name="level"
